@@ -268,6 +268,7 @@ show_track(void)
 static PyDictObject *free_list[PyDict_MAXFREELIST];
 static int numfree = 0;
 
+// tristeen: 在Py_Finalize中调用
 void
 PyDict_Fini(void)
 {
@@ -283,11 +284,15 @@ PyDict_Fini(void)
 PyObject *
 PyDict_New(void)
 {
+    // tristeen: 编译器在编译时尽量安排寄存器去存储该变量
     register PyDictObject *mp;
     if (dummy == NULL) { /* Auto-initialize dummy */
         dummy = PyString_FromString("<dummy key>");
         if (dummy == NULL)
             return NULL;
+        // tristeen: 注册到exitfuncs，在Py_Finalize中调用。
+        // 在dummy==NULL分支里，保证只执行一次。
+        // 插入顺序和调用顺序相反。
 #ifdef SHOW_CONVERSION_COUNTS
         Py_AtExit(show_counts);
 #endif
@@ -302,6 +307,7 @@ PyDict_New(void)
         mp = free_list[--numfree];
         assert (mp != NULL);
         assert (Py_TYPE(mp) == &PyDict_Type);
+        // tristeen: 从freelist中取出，要设置引用计数为1
         _Py_NewReference((PyObject *)mp);
         if (mp->ma_fill) {
             EMPTY_TO_MINSIZE(mp);
@@ -325,6 +331,7 @@ PyDict_New(void)
         count_alloc++;
 #endif
     }
+    // tristeen: 当出现非字符串key时，ma_lookup修改成lookdict。
     mp->ma_lookup = lookdict_string;
 #ifdef SHOW_TRACK_COUNT
     count_untracked++;
@@ -336,7 +343,7 @@ PyDict_New(void)
 }
 
 /*
-The basic lookup function used by all operations.
+The basic lookup function used by all operations.·
 This is based on Algorithm D from Knuth Vol. 3, Sec. 6.4.
 Open addressing is preferred over chaining since the link overhead for
 chaining would be substantial (100% with typical malloc overhead).
@@ -373,19 +380,31 @@ lookdict(PyDictObject *mp, PyObject *key, register long hash)
 
     i = (size_t)hash & mask;
     ep = &ep0[i];
+    // tristeen： 找到一个Unused的，或者引用相等的，直接返回。
     if (ep->me_key == NULL || ep->me_key == key)
         return ep;
 
+    // tristeen: freeslot保存散列冲突解决链最前面的可用节点。
+    // 如果是dummy，那么说明后边有Unused、或者active的节点。
     if (ep->me_key == dummy)
         freeslot = ep;
     else {
+        // tristeen: active分支。
+        // 如果hash相等，那么比较key的内容，相等则返回，否则沿着散列冲突解决链查找。
+        // 如果hash不等，说明已经被其他元素占用，则沿着散列冲突解决链查找。
         if (ep->me_hash == hash) {
             startkey = ep->me_key;
+            // tristeen: 确保startkey在执行过程中，不会被free掉。
             Py_INCREF(startkey);
             cmp = PyObject_RichCompareBool(startkey, key, Py_EQ);
             Py_DECREF(startkey);
+            // tristeen： 出错
             if (cmp < 0)
                 return NULL;
+            // tristeen: 这个是在搞什么？
+            // 前面PyDictEntry *ep0 = mp->ma_table;startkey = ep->me_key;
+            // 怎么会不等呢？
+            // else又是什么？
             if (ep0 == mp->ma_table && ep->me_key == startkey) {
                 if (cmp > 0)
                     return ep;
@@ -404,6 +423,8 @@ lookdict(PyDictObject *mp, PyObject *key, register long hash)
 
     /* In the loop, me_key == dummy is by far (factor of 100s) the
        least likely outcome, so test for that last. */
+    // tristeen： 沿着散列冲突链查找。记得可以返回freeslot的时候就返回freeslot.
+    // freeslot是链最前面的可用节点。
     for (perturb = hash; ; perturb >>= PERTURB_SHIFT) {
         i = (i << 2) + i + perturb + 1;
         ep = &ep0[i & mask];
@@ -555,7 +576,10 @@ insertdict_by_entry(register PyDictObject *mp, PyObject *key, long hash,
 {
     PyObject *old_value;
 
+    // tristeen: dict内key，value都是简单元素，则不需要track。
+    // 当插入需要track的元素时，dict本身也要被track。
     MAINTAIN_TRACKING(mp, key, value);
+    // tristeen: active
     if (ep->me_value != NULL) {
         old_value = ep->me_value;
         ep->me_value = value;
@@ -563,8 +587,10 @@ insertdict_by_entry(register PyDictObject *mp, PyObject *key, long hash,
         Py_DECREF(key);
     }
     else {
+        // tristeen: unused
         if (ep->me_key == NULL)
             mp->ma_fill++;
+        // tristeen: dummy
         else {
             assert(ep->me_key == dummy);
             Py_DECREF(dummy);
@@ -592,6 +618,7 @@ insertdict(register PyDictObject *mp, PyObject *key, long hash, PyObject *value)
     assert(mp->ma_lookup != NULL);
     ep = mp->ma_lookup(mp, key, hash);
     if (ep == NULL) {
+        // tristeen: 传入之前incref了。
         Py_DECREF(key);
         Py_DECREF(value);
         return -1;
@@ -607,6 +634,9 @@ using insertdict() in dictresize() is dangerous (SF bug #1456209).
 Note that no refcounts are changed by this routine; if needed, the caller
 is responsible for incref'ing `key` and `value`.
 */
+// tristeen: 假设没有被删除的元素，即没有dummy，所以查找起来更加简单。
+// readonly dict的查找理应简单。
+// 对于填表数据，可以预先申请特定大小的dict，以确保不需要不必要的resize。
 static void
 insertdict_clean(register PyDictObject *mp, PyObject *key, long hash,
                  PyObject *value)
@@ -653,6 +683,7 @@ dictresize(PyDictObject *mp, Py_ssize_t minused)
          newsize <= minused && newsize > 0;
          newsize <<= 1)
         ;
+    // tristeen: 溢出
     if (newsize <= 0) {
         PyErr_NoMemory();
         return -1;
@@ -664,6 +695,8 @@ dictresize(PyDictObject *mp, Py_ssize_t minused)
     is_oldtable_malloced = oldtable != mp->ma_smalltable;
 
     if (newsize == PyDict_MINSIZE) {
+        // tristeen: 对于old和new都是minsize的dict，如果old没有dummy，那么
+        // 直接返回。否则将old的元素拿出来重新插入到new中。确保new中没有dummy。
         /* A large table is shrinking, or we can't get any smaller. */
         newtable = mp->ma_smalltable;
         if (newtable == oldtable) {
@@ -690,6 +723,7 @@ dictresize(PyDictObject *mp, Py_ssize_t minused)
         }
     }
 
+    // tristeen: 因为要重新插入，所有需要两份。
     /* Make the dict empty, using the new table. */
     assert(newtable != oldtable);
     mp->ma_table = newtable;
@@ -725,6 +759,7 @@ dictresize(PyDictObject *mp, Py_ssize_t minused)
    Overestimates just mean the dictionary will be more sparse than usual.
 */
 
+// tristeen: BUILD_MAP中使用该方法。
 PyObject *
 _PyDict_NewPresized(Py_ssize_t minused)
 {
@@ -747,6 +782,7 @@ _PyDict_NewPresized(Py_ssize_t minused)
  * function hits a stack-depth error, which can cause this to return NULL
  * even if the key is present.
  */
+// tristeen: 主要问题是压住所有error。
 PyObject *
 PyDict_GetItem(PyObject *op, PyObject *key)
 {
@@ -771,7 +807,11 @@ PyDict_GetItem(PyObject *op, PyObject *key)
        Let's just hope that no exception occurs then...  This must be
        _PyThreadState_Current and not PyThreadState_GET() because in debug
        mode, the latter complains if tstate is NULL. */
-    tstate = _PyThreadState_Current;
+    // tristeen: 为了防止ma_lookup中出现error，导致tstate的error被修改。
+    // 而getitem方法本身是不抛出error的。
+    tstate = _PyThreadState_Current; 
+    // tristeen: debug模式下, PyThreadState_GET中_PyThreadState_Current为
+    // NULL时会报错。
     if (tstate != NULL && tstate->curexc_type != NULL) {
         /* preserve the existing exception */
         PyObject *err_type, *err_value, *err_tb;
@@ -891,6 +931,7 @@ PyDict_SetItem(register PyObject *op, PyObject *key, PyObject *value)
     return dict_set_item_by_hash_or_entry(op, key, hash, NULL, value);
 }
 
+// tristeen: 设置成dummy。
 int
 PyDict_DelItem(PyObject *op, PyObject *key)
 {
@@ -929,6 +970,7 @@ PyDict_DelItem(PyObject *op, PyObject *key)
     return 0;
 }
 
+// tristeen: 处理dict本身和其中的key，value。 
 void
 PyDict_Clear(PyObject *op)
 {
@@ -959,6 +1001,7 @@ PyDict_Clear(PyObject *op)
      * clearing the slots, and never refer to anything via mp->xxx while
      * clearing.
      */
+    // tristeen: 将key，value与dict脱离，即将dict清空。防止key，value减计数的时候出现问题。
     fill = mp->ma_fill;
     if (table_is_malloced)
         EMPTY_TO_MINSIZE(mp);

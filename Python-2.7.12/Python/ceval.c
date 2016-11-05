@@ -619,6 +619,7 @@ _Py_CheckRecursiveCall(const char *where)
 {
     PyThreadState *tstate = PyThreadState_GET();
 
+    // tristeen:  如果栈用完了，那么报错。
 #ifdef USE_STACKCHECK
     if (PyOS_CheckStack()) {
         --tstate->recursion_depth;
@@ -626,6 +627,7 @@ _Py_CheckRecursiveCall(const char *where)
         return -1;
     }
 #endif
+    // tristeen: 如果递归调用深度大于预设值，那么报错。
     if (tstate->recursion_depth > recursion_limit) {
         --tstate->recursion_depth;
         PyErr_Format(PyExc_RuntimeError,

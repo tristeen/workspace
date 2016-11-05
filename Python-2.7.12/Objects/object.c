@@ -946,6 +946,7 @@ PyObject_RichCompare(PyObject *v, PyObject *w, int op)
     PyObject *res;
 
     assert(Py_LT <= op && op <= Py_GE);
+    // tristeen: Py_EnterRecursiveCall和Py_LeaveRecursiveCall要配套使用。
     if (Py_EnterRecursiveCall(" in cmp"))
         return NULL;
 
