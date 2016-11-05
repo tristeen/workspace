@@ -1111,7 +1111,7 @@ _PyDict_Next(PyObject *op, Py_ssize_t *ppos, PyObject **pkey, PyObject **pvalue,
 }
 
 /* Methods */
-
+// tristeen: 处理key、value，以及多申请的内存。
 static void
 dict_dealloc(register PyDictObject *mp)
 {
@@ -1142,6 +1142,9 @@ dict_print(register PyDictObject *mp, register FILE *fp, register int flags)
     register Py_ssize_t any;
     int status;
 
+    // tristeen: 如果一个dict的一个value是它自己，那么调用print的时候就会无限递归。
+    // 通过在threadstate上记录的正在print的对象。status为1时，表示当前对象正在调用
+    // print。
     status = Py_ReprEnter((PyObject*)mp);
     if (status != 0) {
         if (status < 0)
@@ -1410,6 +1413,7 @@ dict_items(register PyDictObject *mp)
     PyObject *item, *key, *value;
     PyDictEntry *ep;
 
+    // tristeen: 给个例子。
     /* Preallocate the list of tuples, to avoid allocations during
      * the loop over the items, which could trigger GC, which
      * could resize the dict. :-(
