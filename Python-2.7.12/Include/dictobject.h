@@ -47,6 +47,11 @@ meaning otherwise.
  */
 #define PyDict_MINSIZE 8
 
+// tristeen: Py_ssize_t 和 long 会不等长？如果不等长，回导致通过hash直接存取的元素与
+// 字典实际元素不一致。 针对传进来的long hash，需要进行类型转换(Py_ssize_t)hash。在
+// dictobject内部，都是使用Py_ssize_t类型。因此直接根据传入的hash，只能查找long长度
+// 对应的元素，而在dictobject内部，解决冲突时找到的下一个的范围是Py_ssize_t长度对应的。
+// 何时回不一致？
 typedef struct {
     /* Cached hash code of me_key.  Note that hash codes are C longs.
      * We have to use Py_ssize_t instead because dict_popitem() abuses
@@ -84,10 +89,13 @@ struct _dictobject {
      * setitem calls.
      */
     PyDictEntry *ma_table;
+    // tristeen: 函数指针，返回值是PyDictEntry *
     PyDictEntry *(*ma_lookup)(PyDictObject *mp, PyObject *key, long hash);
+    // tristeen: 当不是用ma_smalltable时，ma_smalltable只是没有被ma_table指向而已。
     PyDictEntry ma_smalltable[PyDict_MINSIZE];
 };
 
+// tristeen: Declares public Python data and its type
 PyAPI_DATA(PyTypeObject) PyDict_Type;
 PyAPI_DATA(PyTypeObject) PyDictIterKey_Type;
 PyAPI_DATA(PyTypeObject) PyDictIterValue_Type;
@@ -96,6 +104,9 @@ PyAPI_DATA(PyTypeObject) PyDictKeys_Type;
 PyAPI_DATA(PyTypeObject) PyDictItems_Type;
 PyAPI_DATA(PyTypeObject) PyDictValues_Type;
 
+// tristeen: 通过tp_flags来定义是否是dict类及其子类。ob_type则是指向typeobject。
+// 如class A继承dict，那么A的对象能通过PyDict_Check，但是不能通过PyDict_CheckExact。
+// A继承了tp_flags,但是A的对象的ob_type是class A。
 #define PyDict_Check(op) \
                  PyType_FastSubclass(Py_TYPE(op), Py_TPFLAGS_DICT_SUBCLASS)
 #define PyDict_CheckExact(op) (Py_TYPE(op) == &PyDict_Type)
@@ -106,6 +117,8 @@ PyAPI_DATA(PyTypeObject) PyDictValues_Type;
 # define PyDictViewSet_Check(op) \
     (PyDictKeys_Check(op) || PyDictItems_Check(op))
 
+// tristeen: Declares a public Python API function and return type
+// 在windows系统里，还涉及到dllimport/dllexport。
 PyAPI_FUNC(PyObject *) PyDict_New(void);
 PyAPI_FUNC(PyObject *) PyDict_GetItem(PyObject *mp, PyObject *key);
 PyAPI_FUNC(PyObject *) _PyDict_GetItemWithError(PyObject *mp, PyObject *key);

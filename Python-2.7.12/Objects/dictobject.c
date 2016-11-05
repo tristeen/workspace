@@ -1,3 +1,13 @@
+// tristeen: python的dict基于hash table，c++中map是基于红黑树，
+// c++中unsorted_map通过hash table。 二叉树和散列表的区别主要有以下几点：
+// 1. 二叉树有序，散列表无序。如果需求里边有查找一定范围key对应的item时，有序
+// 会很有帮助。
+// 2. 就查找速度而言，二叉树o(log(n)), 散列表o(1)。通常意义下，散列表查找速度
+// 更快。a. 但是实际情况下，散列表需要计算散列值，二叉树每次比较只需要部分比较（例如
+// 比较字符串的前面几个字符）,即散列表的1代价通常较大，二叉树log(n)中的每次操作
+// 可能代码较小。b. 由于散列冲突的存在，散列表的查找也未必是1。所以，要根据实际应用情况，
+// 基于性能数据来进行选择。
+// 3. 二叉树的空间浪费小, 散列表有一定的空间浪费。
 
 /* Dictionary object implementation using a hash table */
 
@@ -20,6 +30,8 @@ set_key_error(PyObject *arg)
     tup = PyTuple_Pack(1, arg);
     if (!tup)
         return; /* caller will expect error to be set anyway */
+    // tristeen：PyErr_SetObject会将PyExc_KeyError和tup的引用计数加1。caller
+    // 需要把tup的引用计数减1.
     PyErr_SetObject(PyExc_KeyError, tup);
     Py_DECREF(tup);
 }
@@ -29,6 +41,19 @@ set_key_error(PyObject *arg)
 
 /* See large comment block below.  This must be >= 1. */
 #define PERTURB_SHIFT 5
+
+
+// tristeen: python的hash不追求随机性。考虑到经常出现这样的情况: 
+// dict([(i, i) for i in xrange(10)])。
+// 简单情况下，j = ((5*j) + 1) mod 2**i。 2**i为dict的容量。j为hash值。
+// 即只使用hash值的低i位。
+// 为了使用到所有hash值，修改公式为：
+//    j = （(5*j) + 1 + perturb)) mod 2**i;
+//    perturb >>= PERTURB_SHIFT;
+// 其中，perturb初始化位hash值。
+// hash函数和解决冲突的方法简单有效。
+// hash函数优先调用对象的tp_hash, 否则使用地址来hash。 如dict不想被hash，则将tp_hash
+// 定义成PyObject_HashNotImplemented。
 
 /*
 Major subtleties ahead:  Most hash schemes depend on having a "good" hash
@@ -198,6 +223,23 @@ show_track(void)
 #endif
 
 
+// tristeen: PyDict_New 与 dict_new. 显示调用的时候，即知道类型是dict的时候，一般使用
+// PyDict_New。通过PyTypeObject调用时，统一使用tp_new，而dict的tp_new就是dict_new。
+// 例如：前者使用PyDict_New，后者使用dict_new。
+// >>> dis.dis(compile('d = {}', '', 'exec'))
+//   1           0 BUILD_MAP                0
+//               3 STORE_NAME               0 (d)
+//               6 LOAD_CONST               0 (None)
+//               9 RETURN_VALUE        
+// >>> dis.dis(compile('dict()', '', 'exec'))
+//   1           0 LOAD_NAME                0 (dict)
+//               3 CALL_FUNCTION            0
+//               6 POP_TOP             
+//               7 LOAD_CONST               0 (None)
+//              10 RETURN_VALUE        
+//
+//
+
 /* Initialization macros.
    There are two ways to create a dict:  PyDict_New() is the main C API
    function, and the tp_new slot maps to dict_new().  In the latter case we
@@ -218,6 +260,7 @@ show_track(void)
     INIT_NONZERO_DICT_SLOTS(mp);                                        \
     } while(0)
 
+// tristeen: 重用PyDictObject的固定部分，即不能重用malloc的部分。
 /* Dictionary reuse scheme to save calls to malloc, free, and memset */
 #ifndef PyDict_MAXFREELIST
 #define PyDict_MAXFREELIST 80
