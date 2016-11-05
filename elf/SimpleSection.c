@@ -1,5 +1,6 @@
 int printf(const char* format, ...);
 
+
 int global_init_var = 84;
 __attribute__((section("MyData"))) int global_init_var2 = 84;
 int global_uninit_var;
