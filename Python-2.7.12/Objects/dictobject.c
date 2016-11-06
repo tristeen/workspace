@@ -1687,6 +1687,7 @@ static PyObject * dict_copy(register PyDictObject *mp);
 // >>> b = {1: 3, 3:[1], 5: 10}
 // >>> a+b
 // {1: 5, 3: [1, 2, 3], 4: {12: 1, 13: 2}, 5: 10}
+// 如果出现a={...},a的某一个value也是a的情况呢？
 static PyDictObject*
 dict_add(PyDictObject* dict1, PyDictObject *dict2)
 {

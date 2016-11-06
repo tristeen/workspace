@@ -7,6 +7,9 @@ extern "C" {
 
 /* Object and type object interface */
 
+// tristeen: standart type objects是初始化好的全局变量。其他objects均为堆上
+// 动态分配的。所有到处都要考虑gc。
+
 /*
 Objects are structures allocated on the heap.  Special rules apply to
 the use of objects to ensure they are properly garbage-collected.
@@ -16,10 +19,14 @@ exceptions to the first rule; the standard types are represented by
 statically initialized type objects, although work on type/class unification
 for Python 2.2 made it possible to have heap-allocated type objects too).
 
+// trsiteen: 触发点为调用增减引用的宏对应的代码。
 An object has a 'reference count' that is increased or decreased when a
 pointer to the object is copied or deleted; when the reference count
 reaches zero there are no references to the object left and it can be
 removed from the heap.
+
+// tristeen: ob_type定义了object的数据和行为。
+// {}/PyDictObject->PyDict_Type/PyTypeObejct->PyType_Type/PyTypeObject
 
 An object has a 'type' that determines what it represents and what kind
 of data it contains.  An object's type is fixed when it is created.
@@ -27,6 +34,9 @@ Types themselves are represented as objects; an object contains a
 pointer to the corresponding type object.  The type itself has a type
 pointer pointing to the object representing the type 'type', which
 contains a pointer to itself!).
+
+// tristeen: objects的内存位置在分配之后就不会变化，内存移动带来的指针变化难以维护。
+// 对应objects的可变部分，通过objects中一个指针指向不定长度的内存来实现。
 
 Objects do not float around in memory; once allocated an object keeps
 the same size and address.  Objects that must hold variable-size data
@@ -36,6 +46,9 @@ after allocation.  (These restrictions are made so a reference to an
 object can be simply a pointer -- moving an object would require
 updating all the pointers, and changing an object's size would require
 moving it if there was another object right next to it.)
+
+// tristeen: objects都有着固定的头部，refcount和type*。contains在前面还有gc链
+// 的前驱后继指针。everything is object。
 
 Objects are always accessed through pointers of the type 'PyObject *'.
 The type 'PyObject' is a structure that only contains the reference count
@@ -74,6 +87,10 @@ whose size is determined when the object is allocated.
 #define _PyObject_EXTRA_INIT
 #endif
 
+// triseen: 用于struct定义当中。
+// static PyTypeObject PyDateTime_DeltaType = {
+//   PyVarObject_HEAD_INIT(NULL, 0)...
+//
 /* PyObject_HEAD defines the initial segment of every PyObject. */
 #define PyObject_HEAD                   \
     _PyObject_HEAD_EXTRA                \
@@ -217,6 +234,9 @@ typedef int (*visitproc)(PyObject *, void *);
 typedef int (*traverseproc)(PyObject *, visitproc, void *);
 
 typedef struct {
+    // tristeen: Py_TPFLAGS_CHECKTYPES设置就表示相关操作函数只能操作定义该操作
+    // 的type对应的object，在操作之前，会做强制类型转换。
+    // 否则，则直接操作，只需要有操作实际调用到的接口。
     /* For numbers without flag bit Py_TPFLAGS_CHECKTYPES set, all
        arguments are guaranteed to be of the object's type (modulo
        coercion hacks -- i.e. if the type's coercion function
@@ -380,6 +400,7 @@ typedef struct _typeobject {
     struct PyMethodDef *tp_methods;
     struct PyMemberDef *tp_members;
     struct PyGetSetDef *tp_getset;
+    // tristeen: 父类. ob_type为type，object等。
     struct _typeobject *tp_base;
     PyObject *tp_dict;
     descrgetfunc tp_descr_get;
@@ -433,6 +454,7 @@ typedef struct _heaptypeobject {
     ((PyMemberDef *)(((char *)etype) + Py_TYPE(etype)->tp_basicsize))
 
 
+// tristeen: 考虑mro等。
 /* Generic type check */
 PyAPI_FUNC(int) PyType_IsSubtype(PyTypeObject *, PyTypeObject *);
 #define PyObject_TypeCheck(ob, tp) \
@@ -442,6 +464,7 @@ PyAPI_DATA(PyTypeObject) PyType_Type; /* built-in 'type' */
 PyAPI_DATA(PyTypeObject) PyBaseObject_Type; /* built-in 'object' */
 PyAPI_DATA(PyTypeObject) PySuper_Type; /* built-in 'super' */
 
+// tristeen: 检查tp_flag。
 #define PyType_Check(op) \
     PyType_FastSubclass(Py_TYPE(op), Py_TPFLAGS_TYPE_SUBCLASS)
 #define PyType_CheckExact(op) (Py_TYPE(op) == &PyType_Type)
@@ -512,6 +535,8 @@ PyAPI_FUNC(PyObject *) PyObject_Dir(PyObject *);
 /* Helpers for printing recursive container types */
 PyAPI_FUNC(int) Py_ReprEnter(PyObject *);
 PyAPI_FUNC(void) Py_ReprLeave(PyObject *);
+
+// tristeen: temp
 
 /* Helpers for hash functions */
 PyAPI_FUNC(long) _Py_HashDouble(double);
