@@ -225,7 +225,8 @@ show_track(void)
 
 // tristeen: PyDict_New 与 dict_new. 显示调用的时候，即知道类型是dict的时候，一般使用
 // PyDict_New。通过PyTypeObject调用时，统一使用tp_new，而dict的tp_new就是dict_new。
-// 例如：前者使用PyDict_New，后者使用dict_new。
+// 例如：前者使用PyDict_New，后者使用dict_new，或者还会dict_init进行初始化。
+// dict_new可带参数, dict(((1,2),(3,4)), c=4)，参数传给dict_init进行初始化。
 // >>> dis.dis(compile('d = {}', '', 'exec'))
 //   1           0 BUILD_MAP                0
 //               3 STORE_NAME               0 (d)
@@ -1473,6 +1474,7 @@ dict_fromkeys(PyObject *cls, PyObject *args)
     if (d == NULL)
         return NULL;
 
+    // tristeen: 快速通道。 cls为dict本身，非子类，seq为dict，或者set和frozenset。
     if (PyDict_CheckExact(d) && ((PyDictObject *)d)->ma_used == 0) {
         if (PyDict_CheckExact(seq)) {
             PyDictObject *mp = (PyDictObject *)d;
@@ -1552,6 +1554,12 @@ Fail:
     return NULL;
 }
 
+
+// tristeen: args为dict，或者子元素长度为2的序列。
+// >>> dict(((1,2),(3,4)), c=4)
+// {1: 2, 'c': 4, 3: 4}
+// >>> dict({1:2, 3:4}, c=4)
+// {1: 2, 'c': 4, 3: 4}
 static int
 dict_update_common(PyObject *self, PyObject *args, PyObject *kwds, char *methname)
 {
@@ -1614,6 +1622,7 @@ PyDict_MergeFromSeq2(PyObject *d, PyObject *seq2, int override)
         item = PyIter_Next(it);
         if (item == NULL) {
             if (PyErr_Occurred())
+                // tristeen: Fail需要做一些清理。
                 goto Fail;
             break;
         }
@@ -1666,6 +1675,7 @@ PyDict_Update(PyObject *a, PyObject *b)
     return PyDict_Merge(a, b, 1);
 }
 
+// tristeen: a是dict， b支持dict以及mapping对象。
 int
 PyDict_Merge(PyObject *a, PyObject *b, int override)
 {
@@ -1707,6 +1717,7 @@ PyDict_Merge(PyObject *a, PyObject *b, int override)
             if (entry->me_value != NULL &&
                 (override ||
                  PyDict_GetItem(a, entry->me_key) == NULL)) {
+                // tristeen：insertdict会默认caller增加了引用。
                 Py_INCREF(entry->me_key);
                 Py_INCREF(entry->me_value);
                 if (insertdict(mp, entry->me_key,
@@ -1769,6 +1780,7 @@ dict_copy(register PyDictObject *mp)
     return PyDict_Copy((PyObject*)mp);
 }
 
+// tristeen: 生成一个新的dict，merge所有的key，value。
 PyObject *
 PyDict_Copy(PyObject *o)
 {
@@ -1849,6 +1861,8 @@ characterize(PyDictObject *a, PyDictObject *b, PyObject **pval)
             continue;
         thiskey = a->ma_table[i].me_key;
         Py_INCREF(thiskey);  /* keep alive across compares */
+
+        // tristeen： 如果thiskey比已经记录的akey要大，直接continue。
         if (akey != NULL) {
             cmp = PyObject_RichCompareBool(akey, thiskey, Py_LT);
             if (cmp < 0) {
@@ -1873,6 +1887,8 @@ characterize(PyDictObject *a, PyDictObject *b, PyObject **pval)
         /* Compare a[thiskey] to b[thiskey]; cmp <- true iff equal. */
         thisaval = a->ma_table[i].me_value;
         assert(thisaval);
+        // tristeen: 例如比较过程中，malloc一些object，触发了gc，导致thisaval被
+        // 回收掉。
         Py_INCREF(thisaval);   /* keep alive */
         thisbval = PyDict_GetItem((PyObject *)b, thiskey);
         if (thisbval == NULL)
@@ -1887,6 +1903,7 @@ characterize(PyDictObject *a, PyDictObject *b, PyObject **pval)
                 goto Fail;
             }
         }
+        // tristeen: 0为不等。
         if (cmp == 0) {
             /* New winner. */
             Py_XDECREF(akey);
@@ -1924,6 +1941,7 @@ dict_compare(PyDictObject *a, PyDictObject *b)
     /* Same length -- check all keys */
     bdiff = bval = NULL;
     adiff = characterize(a, b, &aval);
+    // tristeen: 长度相等，a中没有entry与b不一样。
     if (adiff == NULL) {
         assert(!aval);
         /* Either an error, or a is a subset with the same length so
@@ -1939,6 +1957,11 @@ dict_compare(PyDictObject *a, PyDictObject *b)
         goto Finished;
     }
     res = 0;
+    // tristeen: 
+    // >>> b = {1: 1, 'd': 3}
+    // >>> a = {1: 1, 'c': 2}
+    // >>> a > b
+    // False
     if (bdiff) {
         /* bdiff == NULL "should be" impossible now, but perhaps
          * the last comparison done by the characterize() on a had
@@ -1997,6 +2020,11 @@ dict_equal(PyDictObject *a, PyDictObject *b)
     return 1;
  }
 
+// tristeen: richcompare与compare的区别。调用不同的函数，可能用于特定目的。
+// >>> x = numpy.array([1, 2, 3, 4, 5])
+// >>> y = numpy.array([2, 2, 1, 4, 4])
+// >>> x == y
+// array([False,  True, False,  True, False], dtype=bool)
 static PyObject *
 dict_richcompare(PyObject *v, PyObject *w, int op)
 {
@@ -2119,6 +2147,10 @@ dict_clear(register PyDictObject *mp)
     Py_RETURN_NONE;
 }
 
+// tristeen: pop可以提供默认值
+// >>> a = {1:2}
+// >>> a.pop(3, 0)
+// 0
 static PyObject *
 dict_pop(PyDictObject *mp, PyObject *args)
 {
@@ -2164,6 +2196,15 @@ dict_pop(PyDictObject *mp, PyObject *args)
     return old_value;
 }
 
+// tristeen: ma_table[0].me_hash可能会记录下一个需要处理的entry。
+// 但是如果dict更新导致ma_table[0]被覆盖之后，popitem之间不会保持之前的顺序。
+// popitem并不能保证按ma_table的顺序。
+// >>> a = {1: 2, 3: 3}
+// >>> a.popitem()
+// (1, 2)
+// >>> a.update({1:1, 2:2, 4:4, 5:5})
+// >>> a.popitem()
+// (1, 1)
 static PyObject *
 dict_popitem(PyDictObject *mp)
 {
@@ -2230,6 +2271,7 @@ dict_traverse(PyObject *op, visitproc visit, void *arg)
     PyObject *pv;
 
     while (PyDict_Next(op, &i, &pk, &pv)) {
+        // tristeen: visit(op, arg)
         Py_VISIT(pk);
         Py_VISIT(pv);
     }
@@ -2243,6 +2285,7 @@ dict_tp_clear(PyObject *op)
     return 0;
 }
 
+// tristeen: temp now.
 
 extern PyTypeObject PyDictIterKey_Type; /* Forward */
 extern PyTypeObject PyDictIterValue_Type; /* Forward */
