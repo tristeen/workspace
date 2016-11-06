@@ -1722,7 +1722,6 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
             Py_INCREF(entry->me_key);
             Py_INCREF(value);
 
-            // if (PyDict_SetItem(result, entry->me_key, value) != 0)
             if (insertdict(result, entry->me_key,
                            (long)entry->me_hash,
                            value) != 0) {
@@ -1734,66 +1733,6 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
     }
 
     return result;
-    /*
-    PyListObject *key1;
-    PyListObject *key2;
-    key1 = dict_keys(dict1);
-    if (key1 == NULL)
-        return NULL;    
-    key2 = dict_keys(dict2);
-    if (key2 == NULL)
-        return NULL;
-
-    Py_ssize_t len1 = PyList_Size(key1);
-    if (len1 < 0)
-        return NULL;
-    Py_ssize_t len2 = PyList_Size(key2);
-    if (len2 < 0)
-        return NULL;
-
-    Py_ssize_t len = len1 + len2;
-    PyDictObject *result = _PyDict_NewPresized(len);*/
-
-    /*PyDictObject *result = PyDict_New();
-
-    if (PyDict_Merge(result, dict1, 1) != 0)
-    {
-        Py_XDECREF(result);
-        return NULL;
-    }
-
-    if (PyDict_Merge(result, dict2, 1) != 0)
-    {
-        Py_XDECREF(result);
-        return NULL;
-    }
-   
-    for (Py_ssize_t i = 0; i <= result->ma_mask; i++)
-    {
-        PyDictEntry *entry = &result->ma_table[i];
-        printf("1 index: %d, len: %d.\n", i, len);
-
-        if (entry->me_value == NULL)
-            continue;
-
-        PyObject *value = PyDict_GetItem(dict1, entry->me_key);
-        printf("2 index: %d, len: %d.\n", i, len);
-
-        if (value == NULL)
-        {
-            value = PyDict_GetItem(dict2, entry->me_key); 
-            printf("3 index: %d, len: %d.\n", i, len);
-
-        }
-        if (PyDict_SetItem(result, entry->me_key, value) < 0)
-        {
-            Py_XDECREF(result);
-            return NULL;
-        }
-        printf("4 index: %d, len: %d.\n", i, len);
-    }    
-
-    return result;*/
 }
 
 // tristeen: a是dict， b支持dict以及mapping对象。
