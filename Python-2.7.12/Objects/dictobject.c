@@ -1697,6 +1697,7 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
     PyDictObject *result = dict_copy(dict1);
 
     if (dict2->ma_used == 0)
+        Py_XDECREF(result);
         return result;
 
     /*if ((result->ma_fill + dict2->ma_used)*3 >= (result->ma_mask+1)*2) {
@@ -1717,6 +1718,7 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
                 if (value == NULL) {
                     PyErr_Format(PyExc_TypeError, "%s and %s can't be added.",
                        entry->me_value->ob_type->tp_name, old_value->ob_type->tp_name);
+                    Py_XDECREF(result);
                     return NULL;
                 }
             }
