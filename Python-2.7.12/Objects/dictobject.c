@@ -234,8 +234,10 @@ show_track(void)
 //               6 LOAD_CONST               0 (None)
 //               9 RETURN_VALUE        
 // >>> dis.dis(compile('dict()', '', 'exec'))
-//   1           0 LOAD_NAME                0 (dict)
-//               3 CALL_FUNCTION            0
+//   1           0 LOAD_NAME                0 (dict) // load type dict
+//               3 CALL_FUNCTION            0 
+//               最终会调用PyObject_Call,里边会调用func->ob_type->tp_call，
+//               即type的tp_call。
 //               6 POP_TOP             
 //               7 LOAD_CONST               0 (None)
 //              10 RETURN_VALUE        
@@ -2543,6 +2545,37 @@ dict_iter(PyDictObject *dict)
     return dictiter_new(dict, &PyDictIterKey_Type);
 }
 
+// tristeen: 添加dict1+dict2操作
+static PyObject*
+dict_add(PyObject* dict1, PyObject *dict2)
+{
+    PyObject *result = PyDict_New();
+    if (result == NULL)
+        reutrn NULL;
+    // real logic here.
+    return result;
+}
+
+static PyNumberMethods dict_as_number = {
+    (binaryfunc)dict_add,               /*nb_add*/
+    0,                                  /*nb_subtract*/
+    0,                                  /*nb_multiply*/
+    0,                                  /*nb_divide*/
+    0,                                  /*nb_remainder*/
+    0,                                  /*nb_divmod*/
+    0,                                  /*nb_power*/
+    0,                                  /*nb_negative*/
+    0,                                  /*nb_positive*/
+    0,                                  /*nb_absolute*/
+    0,                                  /*nb_nonzero*/
+    0,                                  /*nb_invert*/
+    0,                                  /*nb_lshift*/
+    0,                                  /*nb_rshift*/
+    0,                                  /*nb_and*/
+    0,                                  /*nb_xor*/
+    0,                                  /*nb_or*/
+};
+
 PyDoc_STRVAR(dictionary_doc,
 "dict() -> new empty dictionary\n"
 "dict(mapping) -> new dictionary initialized from a mapping object's\n"
@@ -2578,7 +2611,7 @@ PyTypeObject PyDict_Type = {
     0,                                          /* tp_setattr */
     (cmpfunc)dict_compare,                      /* tp_compare */
     (reprfunc)dict_repr,                        /* tp_repr */
-    0,                                          /* tp_as_number */
+    &dict_as_number,                            /* tp_as_number */
     &dict_as_sequence,                          /* tp_as_sequence */
     &dict_as_mapping,                           /* tp_as_mapping */
     (hashfunc)PyObject_HashNotImplemented,      /* tp_hash */
