@@ -1714,7 +1714,8 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
             if (old_value != NULL) {
                 value = PyNumber_Add(value, old_value);
                 if (value == NULL) {
-                    PyErr_SetString(PyExc_ValueError, "PyNumber_Add error during dict_add.");
+                    PyErr_Format(PyExc_TypeError, "%s and %s can't be added.",
+                       entry->me_value->ob_type->tp_name, old_value->ob_type->tp_name);
                     return NULL;
                 }
             }
@@ -1726,7 +1727,7 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
                            (long)entry->me_hash,
                            value) != 0) {
                 Py_XDECREF(result);
-                PyErr_SetString(PyExc_ValueError, "insertdict error during dict_add.");
+                PyErr_SetString(PyExc_RuntimeError, "insertdict error during dict_add.");
                 return NULL;
             }      
         }
