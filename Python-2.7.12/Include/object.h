@@ -536,7 +536,6 @@ PyAPI_FUNC(PyObject *) PyObject_Dir(PyObject *);
 PyAPI_FUNC(int) Py_ReprEnter(PyObject *);
 PyAPI_FUNC(void) Py_ReprLeave(PyObject *);
 
-// tristeen: temp
 
 /* Helpers for hash functions */
 PyAPI_FUNC(long) _Py_HashDouble(double);
@@ -640,6 +639,8 @@ manually remove this flag though!
 /* Objects support nb_index in PyNumberMethods */
 #define Py_TPFLAGS_HAVE_INDEX (1L<<17)
 
+// tristeen: Py_TPFLAGS_HAVE_VERSION_TAG?
+
 /* Objects support type attribute cache */
 #define Py_TPFLAGS_HAVE_VERSION_TAG   (1L<<18)
 #define Py_TPFLAGS_VALID_VERSION_TAG  (1L<<19)
@@ -712,12 +713,17 @@ complications in the deallocation function.  (This is actually a
 decision that's up to the implementer of each new type so if you want,
 you can count such references to the type object.)
 
+// tristeen: how about side-effect-free argument?
+
 *** WARNING*** The Py_DECREF macro must have a side-effect-free argument
 since it may evaluate its argument multiple times.  (The alternative
 would be to mace it a proper function or assign it to a global temporary
 variable first, both of which are slower; and in a multi-threaded
 environment the global variable trick is not safe.)
 */
+
+// tristeen: 对于不同的build选项，定义同样的宏。如果某个编译选项下，不需要使用
+// 某个宏，则将这个宏定义成空。这样可以使得代码统一，不需要再代码中判断build选项。
 
 /* First define a pile of simple helper macros, one set per special
  * build symbol.  These either expand to the obvious things, or to
@@ -765,6 +771,9 @@ PyAPI_FUNC(void) dec_count(PyTypeObject *);
 #endif /* COUNT_ALLOCS */
 
 #ifdef Py_TRACE_REFS
+// tristeen: 函数相对宏而言，干了更多的事情。例如将object加入了refchain。
+// refchain是所有live objects的循环双向链表。
+
 /* Py_TRACE_REFS is such major surgery that we call external routines. */
 PyAPI_FUNC(void) _Py_NewReference(PyObject *);
 PyAPI_FUNC(void) _Py_ForgetReference(PyObject *);
@@ -777,6 +786,7 @@ PyAPI_FUNC(void) _Py_AddToAllObjects(PyObject *, int force);
 /* Without Py_TRACE_REFS, there's little enough to do that we expand code
  * inline.
  */
+// tristeen: release情况下，只是将ob_refcnt置为1。
 #define _Py_NewReference(op) (                          \
     _Py_INC_TPALLOCS(op) _Py_COUNT_ALLOCS_COMMA         \
     _Py_INC_REFTOTAL  _Py_REF_DEBUG_COMMA               \
@@ -810,6 +820,13 @@ PyAPI_FUNC(void) _Py_AddToAllObjects(PyObject *, int force);
  *     Py_XDECREF(op);
  *     op = NULL;
  *
+ // tristeen: 上边代码的问题在于：在line 1可能会op dealloc，从而导致可能存在的
+ // __del__或者weakref的回调。由于执行这些python代码可能会导致释放GIL。这时，在
+ // 其他线程当中，有用到op的地方都会出问题。op已经是个野指针，可能导致段错误等。
+ //
+ // tristeen:要慎用__del__。__del__会导致gc时无法释放(不会加入unreachable)。
+ // __del__会导致对象析构时丢失GIL，从而出现多线程错误。
+
  * Typically, `op` is something like self->containee, and `self` is done
  * using its `containee` member.  In the code sequence above, suppose
  * `containee` is non-NULL with a refcount of 1.  Its refcount falls to
@@ -895,6 +912,9 @@ where NULL (nil) is not suitable (since NULL often means 'error').
 
 Don't forget to apply Py_INCREF() when returning this value!!!
 */
+
+// tristeen: _Py_NoneStruct是一个type为PyNone_Type的object。
+
 PyAPI_DATA(PyObject) _Py_NoneStruct; /* Don't use this directly */
 #define Py_None (&_Py_NoneStruct)
 
@@ -905,6 +925,8 @@ PyAPI_DATA(PyObject) _Py_NoneStruct; /* Don't use this directly */
 Py_NotImplemented is a singleton used to signal that an operation is
 not implemented for a given type combination.
 */
+// tristeen: _Py_NotImplementedStruct是一个type为PyNotImplemented_Type的对象。
+
 PyAPI_DATA(PyObject) _Py_NotImplementedStruct; /* Don't use this directly */
 #define Py_NotImplemented (&_Py_NotImplementedStruct)
 
@@ -978,6 +1000,17 @@ the reference count, since most frequently the object is only looked at
 quickly.  Thus, to retrieve an object and store it again, the caller
 must call Py_INCREF() explicitly.
 
+// tristeen: consume表示caller不需要decref，在PyList_SetItem内部
+// 会decref(有必要的话)。
+// 通常情况下:
+// PyObject *obj = xxx_new();
+// f(obj);
+// Py_DECREF(obj);
+// 如果callee为PyList_SetItem的话，不需要decref。
+// PyObject *obj = xxx_new();
+// PyList_SetItem(obj);
+// 这样做的目的是针对一些常用函数，减少一些incref和decref。
+
 NOTE: functions that 'consume' a reference count, like
 PyList_SetItem(), consume the reference even if the object wasn't
 successfully stored, to simplify error handling.
@@ -992,6 +1025,9 @@ times.
 
 /* Trashcan mechanism, thanks to Christian Tismer.
 
+// tristeen: 为何会引起stack fault? 因为调用深度可能无限制(unbounded)，容易导致
+// 栈空间用完，从而引发stack fault。
+
 When deallocating a container object, it's possible to trigger an unbounded
 chain of deallocations, as each Py_DECREF in turn drops the refcount on "the
 next" object in the chain to 0.  This can easily lead to stack faults, and
@@ -999,6 +1035,9 @@ especially in threads (which typically have less stack space to work with).
 
 A container object that participates in cyclic gc can avoid this by
 bracketing the body of its tp_dealloc function with a pair of macros:
+
+// triseen: Py_TRASHCAN_SAFE_BEGIN和Py_TRASHCAN_SAFE_END，限制调用深度不超过
+// PyTrash_UNWIND_LEVEL。超过的时候，将p记录下来，而不做真正的dealloc。
 
 static void
 mytype_dealloc(mytype *p)
@@ -1016,6 +1055,20 @@ CAUTION:  Never return from the middle of the body!  If the body needs to
 "get out early", put a label immediately before the Py_TRASHCAN_SAFE_END
 call, and goto it.  Else the call-depth counter (see below) will stay
 above 0 forever, and the trashcan will never get emptied.
+
+// tristeen: 当调用深度超过PyTrash_UNWIND_LEVEL的时候，
+// _PyTrash_thread_deposit_object记录下来对应的p。当调用深度回退到0的时候，
+// _PyTrash_thread_destroy_chain调用之前记录的p对应的dealloc。
+// 例如：假设最大调用深度为3。
+// p =[1, [2, [3, 4]]]
+// dealloc p (call-depth 1)-> delloc 1 (call-depth 2), 
+//                            delloc [2, [3, 4]] (call-depth 2)
+// dealloc [2, [3, 4]] (call-depth 2) -> dealloc 2 (call-depth 3),
+//                                       dealloc [3, 4] (call-depth 3)
+// trash_delete_later: [3, 4], 2
+// return from dealloc [2, [3, 4]] (call-depth 1)
+// return from dealloc p (call-depth 0)
+// 调用_PyTrash_thread_destroy_chain，dealloc [3, 4], dealloc 2。
 
 How it works:  The BEGIN macro increments a call-depth counter.  So long
 as this counter is small, the body of the deallocator is run directly without
