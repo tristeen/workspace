@@ -159,6 +159,7 @@ practice, this probably won't make a lick of difference for many years (at
 which point everyone will have terabytes of RAM on 64-bit boxes).
 */
 
+//tristeen: static防止污染其他模块，通过h文件里边定义非static的其他模块可以使用的接口。
 /* Object used as dummy key to fill deleted entries */
 static PyObject *dummy = NULL; /* Initialized by first call to newPyDictObject() */
 
@@ -2285,7 +2286,6 @@ dict_tp_clear(PyObject *op)
     return 0;
 }
 
-// tristeen: temp now.
 
 extern PyTypeObject PyDictIterKey_Type; /* Forward */
 extern PyTypeObject PyDictIterValue_Type; /* Forward */
@@ -2310,6 +2310,17 @@ dict_iteritems(PyDictObject *dict)
     return dictiter_new(dict, &PyDictIterItem_Type);
 }
 
+// tristeen: 计算占用空间，非active占用的空间
+// >>> dict([(i, i) for i in xrange(1)]).__sizeof__()
+// 248
+// >>> dict([(i, i) for i in xrange(5)]).__sizeof__()
+// 248
+// >>> dict([(i, i) for i in xrange(6)]).__sizeof__()
+// 1016
+// 少于或等于等于5个entry，dict使用smalltable。
+// 当超过5个entry时，dict需要malloc新的内存，申请大小为
+// (6 * 4) * 24 = 768，6为active entry的个数，resize的时候
+// 申请4倍大小，每个entry24个字节(hash, key, value各占8个字节).
 static PyObject *
 dict_sizeof(PyDictObject *mp)
 {
@@ -2355,6 +2366,10 @@ PyDoc_STRVAR(items__doc__,
 PyDoc_STRVAR(values__doc__,
 "D.values() -> list of D's values");
 
+// trsiteen: c的语法就是换行符隔开的字符串，会默认去掉换行符
+// char *str = "hello "
+//              "world";
+// >>> hello world
 PyDoc_STRVAR(update__doc__,
 "D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.\n"
 "If E present and has a .keys() method, does:     for k in E: D[k] = E[k]\n\
@@ -2481,6 +2496,11 @@ static PySequenceMethods dict_as_sequence = {
     0,                          /* sq_inplace_repeat */
 };
 
+// trsiteen: PyDict_New会使用freelist和PyObject_GC_New。
+// dict_new使用tp_alloc:PyType_GenericAlloc。
+// tp_call会先调用tp_new，然后调用tp_init。
+// >>> d = dict(((1,2),(2,2),), c=1)
+// type_call->type.tp_new(type.tp_alloc)->type.tp_init。
 static PyObject *
 dict_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
@@ -2516,6 +2536,7 @@ dict_init(PyObject *self, PyObject *args, PyObject *kwds)
     return dict_update_common(self, args, kwds, "dict");
 }
 
+// tristeen: dict_iter等效于dict_iterkeys。
 static PyObject *
 dict_iter(PyDictObject *dict)
 {
@@ -2533,6 +2554,19 @@ PyDoc_STRVAR(dictionary_doc,
 "dict(**kwargs) -> new dictionary initialized with the name=value pairs\n"
 "    in the keyword argument list.  For example:  dict(one=1, two=2)");
 
+// trsiteen: {}.ob_type -> dict. dict.ob_type -> type.
+// >>> for i in {1:1, 2:2}: pass
+// GET_ITER，调用dict的tp_iter生成迭代器，并入栈。即调用dict_iter,
+// 生成PyDictIterKey_Type
+// 
+// keys()生成一个list。
+// iterkeys()生成一个dictiterobject。iter有当前index和实际的dict对象。
+// dictiterobject的type是PyDictIterKey_Type。
+// viewkeys()生成一个dictviewobject支持一些集合操作。
+// dictviewobject的type是PyDictKeys_Type。当需要迭代dictviewobject
+// 时，PyDictKeys_Type的tp_iter生成PyDictIterKey_Type的dictiterobject。
+//
+// view本身没有数据，只是包装内部的dict。
 PyTypeObject PyDict_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "dict",
@@ -2632,6 +2666,10 @@ static PyObject *
 dictiter_new(PyDictObject *dict, PyTypeObject *itertype)
 {
     dictiterobject *di;
+    // tristeen: PyObject_GC_New根据typeobj生成object，返回指向type的指针。
+    // #define PyObject_GC_New(type, typeobj) \
+    //  ( (type *) _PyObject_GC_New(typeobj) )
+    // di的ob_type指向itertype。
     di = PyObject_GC_New(dictiterobject, itertype);
     if (di == NULL)
         return NULL;
@@ -2696,6 +2734,9 @@ static PyObject *dictiter_iternextkey(dictiterobject *di)
         return NULL;
     assert (PyDict_Check(d));
 
+    // trsiteen: 当ma_used改变的时候，会报错。当更新value，但是没有引起key
+    // 增加和减少时，iter正常运行。此时，因为并不会引起dict的resize，所以iter
+    // 顺序是正确的。
     if (di->di_used != d->ma_used) {
         PyErr_SetString(PyExc_RuntimeError,
                         "dictionary changed size during iteration");
@@ -2724,6 +2765,8 @@ fail:
     return NULL;
 }
 
+// tristeen: GET_ITER使用tp_iter生成一个迭代器，FOR_ITER将调用
+// 迭代器的ob_type的tp_iternext中生成下一个元素。
 PyTypeObject PyDictIterKey_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "dictionary-keyiterator",                   /* tp_name */
@@ -2950,6 +2993,8 @@ dictview_len(dictviewobject *dv)
     return len;
 }
 
+// tristeen: 生成dictviewobject,该object的ob_type为传入的type，
+// dv_dict为传入的dict。
 static PyObject *
 dictview_new(PyObject *dict, PyTypeObject *type)
 {
