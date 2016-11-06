@@ -1678,6 +1678,120 @@ PyDict_Update(PyObject *a, PyObject *b)
     return PyDict_Merge(a, b, 1);
 }
 
+static PyObject * dict_copy(register PyDictObject *mp);
+
+// tristeen: 添加dict1+dict2操作。
+// 1. keys = dict1.keys() + dict2.keys()。
+// 2. for every key, add value。
+// 3. if value is mapping, error now.
+static PyDictObject*
+dict_add(PyDictObject* dict1, PyDictObject *dict2)
+{
+    if (!PyDict_Check(dict1) || !PyDict_Check(dict2))
+        return NULL;
+
+    PyDictObject *result = dict_copy(dict1);
+
+    if (dict2->ma_used == 0)
+        return result;
+
+    if ((result->ma_fill + dict2->ma_used)*3 >= (result->ma_mask+1)*2) {
+        if (dictresize(result, (dict1->ma_used + dict2->ma_used)*2) != 0)
+            Py_XDECREF(result);
+            PyErr_SetString(PyExc_ValueError, "resize error during dict_add.");
+            return NULL;
+    }       
+
+    for (Py_ssize_t i = 0; i <= dict2->ma_mask; i++) {
+        PyDictEntry *entry = &dict2->ma_table[i];
+        if (entry->me_value != NULL) {
+            PyObject *key = entry->me_key;
+            PyObject *value = entry->me_value;
+            PyObject *old_value = PyDict_GetItem(result, entry->me_key);
+            if (old_value != NULL) {
+                value = PyNumber_Add(value, old_value);
+                if (value == NULL) {
+                    PyErr_SetString(PyExc_ValueError, "PyNumber_Add error during dict_add.");
+                    return NULL;
+                }
+            }
+            Py_INCREF(entry->me_key);
+            Py_INCREF(value);
+
+            // if (PyDict_SetItem(result, entry->me_key, value) != 0)
+            if (insertdict(result, entry->me_key,
+                           (long)entry->me_hash,
+                           value) != 0) {
+                Py_XDECREF(result);
+                PyErr_SetString(PyExc_ValueError, "insertdict error during dict_add.");
+                return NULL;
+            }      
+        }
+    }
+
+    return result;
+    /*
+    PyListObject *key1;
+    PyListObject *key2;
+    key1 = dict_keys(dict1);
+    if (key1 == NULL)
+        return NULL;    
+    key2 = dict_keys(dict2);
+    if (key2 == NULL)
+        return NULL;
+
+    Py_ssize_t len1 = PyList_Size(key1);
+    if (len1 < 0)
+        return NULL;
+    Py_ssize_t len2 = PyList_Size(key2);
+    if (len2 < 0)
+        return NULL;
+
+    Py_ssize_t len = len1 + len2;
+    PyDictObject *result = _PyDict_NewPresized(len);*/
+
+    /*PyDictObject *result = PyDict_New();
+
+    if (PyDict_Merge(result, dict1, 1) != 0)
+    {
+        Py_XDECREF(result);
+        return NULL;
+    }
+
+    if (PyDict_Merge(result, dict2, 1) != 0)
+    {
+        Py_XDECREF(result);
+        return NULL;
+    }
+   
+    for (Py_ssize_t i = 0; i <= result->ma_mask; i++)
+    {
+        PyDictEntry *entry = &result->ma_table[i];
+        printf("1 index: %d, len: %d.\n", i, len);
+
+        if (entry->me_value == NULL)
+            continue;
+
+        PyObject *value = PyDict_GetItem(dict1, entry->me_key);
+        printf("2 index: %d, len: %d.\n", i, len);
+
+        if (value == NULL)
+        {
+            value = PyDict_GetItem(dict2, entry->me_key); 
+            printf("3 index: %d, len: %d.\n", i, len);
+
+        }
+        if (PyDict_SetItem(result, entry->me_key, value) < 0)
+        {
+            Py_XDECREF(result);
+            return NULL;
+        }
+        printf("4 index: %d, len: %d.\n", i, len);
+    }    
+
+    return result;*/
+}
+
 // tristeen: a是dict， b支持dict以及mapping对象。
 int
 PyDict_Merge(PyObject *a, PyObject *b, int override)
@@ -2543,17 +2657,6 @@ static PyObject *
 dict_iter(PyDictObject *dict)
 {
     return dictiter_new(dict, &PyDictIterKey_Type);
-}
-
-// tristeen: 添加dict1+dict2操作
-static PyObject*
-dict_add(PyObject* dict1, PyObject *dict2)
-{
-    PyObject *result = PyDict_New();
-    if (result == NULL)
-        reutrn NULL;
-    // real logic here.
-    return result;
 }
 
 static PyNumberMethods dict_as_number = {
