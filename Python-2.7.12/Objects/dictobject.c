@@ -1683,7 +1683,10 @@ static PyObject * dict_copy(register PyDictObject *mp);
 // tristeen: 添加dict1+dict2操作。
 // 1. keys = dict1.keys() + dict2.keys()。
 // 2. for every key, add value。
-// 3. if value is mapping, error now.
+// >>> a = {1: 2, 3:[2,3], 4: {12:1, 13:2}}
+// >>> b = {1: 3, 3:[1], 5: 10}
+// >>> a+b
+// {1: 5, 3: [1, 2, 3], 4: {12: 1, 13: 2}, 5: 10}
 static PyDictObject*
 dict_add(PyDictObject* dict1, PyDictObject *dict2)
 {
@@ -1695,12 +1698,12 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
     if (dict2->ma_used == 0)
         return result;
 
-    if ((result->ma_fill + dict2->ma_used)*3 >= (result->ma_mask+1)*2) {
+    /*if ((result->ma_fill + dict2->ma_used)*3 >= (result->ma_mask+1)*2) {
         if (dictresize(result, (dict1->ma_used + dict2->ma_used)*2) != 0)
             Py_XDECREF(result);
             PyErr_SetString(PyExc_ValueError, "resize error during dict_add.");
             return NULL;
-    }       
+    }*/    
 
     for (Py_ssize_t i = 0; i <= dict2->ma_mask; i++) {
         PyDictEntry *entry = &dict2->ma_table[i];
