@@ -41,6 +41,8 @@ int Py_Py3kWarningFlag;
  * together via the _ob_prev and _ob_next members of a PyObject, which
  * exist only in a Py_TRACE_REFS build.
  */
+
+ // tristeen: 初始化_ob_prev和_bo_next，指向自身。
 static PyObject refchain = {&refchain, &refchain};
 
 /* Insert op at the front of the list of all objects.  If force is true,
@@ -75,6 +77,8 @@ _Py_AddToAllObjects(PyObject *op, int force)
 #endif  /* Py_TRACE_REFS */
 
 #ifdef COUNT_ALLOCS
+// trsiteen: 通过PyType_Object的_ob_prev和_ob_next组成的链表。
+
 static PyTypeObject *type_list;
 /* All types are added to type_list, at least when
    they get one object created. That makes them
@@ -138,6 +142,7 @@ get_counts(void)
 void
 inc_count(PyTypeObject *tp)
 {
+    // tristeen: 如果没有加入type_list，则添加进去。
     if (tp->tp_next == NULL && tp->tp_prev == NULL) {
         /* first time; insert in linked list */
         if (tp->tp_next != NULL) /* sanity check */
@@ -214,6 +219,7 @@ Py_DecRef(PyObject *o)
     Py_XDECREF(o);
 }
 
+// tristeen: PyObject_INIT是PyObject_Init的宏版本。
 PyObject *
 PyObject_Init(PyObject *op, PyTypeObject *tp)
 {
@@ -423,6 +429,9 @@ _PyObject_Str(PyObject *v)
     if (Py_TYPE(v)->tp_str == NULL)
         return PyObject_Repr(v);
 
+    // tristeen: 防止递归深度过大。深度过大会导致栈错误。
+    // Py_EnterRecursiveCall会增加threadstate的recursion_depth。
+    // 判断递归深度有两个方法，一个是栈用完了，一个是深度超过recursion_limit。
     /* It is possible for a type to have a tp_str representation that loops
        infinitely. */
     if (Py_EnterRecursiveCall(" while getting the str of an object"))
@@ -1321,6 +1330,8 @@ _PyObject_NextNotImplemented(PyObject *self)
                  Py_TYPE(self)->tp_name);
     return NULL;
 }
+
+// tristeen: temp now.
 
 /* Generic GetAttr functions - put these in your tp_[gs]etattro slot */
 
