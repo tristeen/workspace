@@ -1331,10 +1331,10 @@ _PyObject_NextNotImplemented(PyObject *self)
     return NULL;
 }
 
-// tristeen: temp now.
 
 /* Generic GetAttr functions - put these in your tp_[gs]etattro slot */
 
+// tristeen: 属性查找的顺序。
 PyObject *
 _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
 {
@@ -1367,6 +1367,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
     else
         Py_INCREF(name);
 
+    // tristeen: 通过tp_dict来判断type有没有ready。
     if (tp->tp_dict == NULL) {
         if (PyType_Ready(tp) < 0)
             goto done;
@@ -1398,6 +1399,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
         }
     }
 #else
+    // tristeen: 根据mro查找父类的方法。
     descr = _PyType_Lookup(tp, name);
 #endif
 
@@ -1406,6 +1408,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
     f = NULL;
     if (descr != NULL &&
         PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
+        // tristeen: f是data attribute的descriptor objects。
         f = descr->ob_type->tp_descr_get;
         if (f != NULL && PyDescr_IsData(descr)) {
             res = f(descr, obj, (PyObject *)obj->ob_type);
@@ -1671,6 +1674,7 @@ PyCallable_Check(PyObject *x)
 {
     if (x == NULL)
         return 0;
+    // tristeen: ob_type是PyInstance_Type。
     if (PyInstance_Check(x)) {
         PyObject *call = PyObject_GetAttrString(x, "__call__");
         if (call == NULL) {
@@ -1696,7 +1700,7 @@ PyCallable_Check(PyObject *x)
    interesting.
    Return 0 on success, -1 on error.
 */
-
+// tristeen: merge aclass以及其父类的__dict__。
 static int
 merge_class_dict(PyObject* dict, PyObject* aclass)
 {
@@ -1754,7 +1758,7 @@ merge_class_dict(PyObject* dict, PyObject* aclass)
    Return 0 on success, -1 on error.  Errors due to not finding the attr,
    or the attr not being a list, are suppressed.
 */
-
+// tristeen: merge某个列表属性，将该列表里边所有属性加入dict。
 static int
 merge_list_attr(PyObject* dict, PyObject* obj, const char *attrname)
 {
@@ -1800,6 +1804,7 @@ static PyObject *
 _dir_locals(void)
 {
     PyObject *names;
+    // tristeen: 返回当前PyFrameObject的f_locals。
     PyObject *locals = PyEval_GetLocals();
 
     if (locals == NULL) {
@@ -1807,6 +1812,7 @@ _dir_locals(void)
         return NULL;
     }
 
+    // tristeen: locals.keys()。
     names = PyMapping_Keys(locals);
     if (!names)
         return NULL;
@@ -1825,6 +1831,7 @@ _dir_locals(void)
    We deliberately don't suck up its __class__, as methods belonging to the
    metaclass would probably be more confusing than helpful.
 */
+// tristeen: dir和getattr查找的数据集合是一样的？
 static PyObject *
 _specialized_dir_type(PyObject *obj)
 {
@@ -1945,10 +1952,14 @@ _dir_object(PyObject *obj)
     if (dirfunc == NULL) {
         /* use default implementation */
         if (PyModule_Check(obj))
+            // tristeen: returns the module's __dict__.
             result = _specialized_dir_module(obj);
         else if (PyType_Check(obj) || PyClass_Check(obj))
+            // tristeen: returns __dict__ and __bases__.
             result = _specialized_dir_type(obj);
         else
+            // tristeen: returns __dict__, __class__,
+            // and recursively up the __class__.__bases__ chain.
             result = _generic_dir(obj);
     }
     else {
@@ -2232,6 +2243,7 @@ _Py_ReadyTypes(void)
 
 #ifdef Py_TRACE_REFS
 
+// tristeen: 如果没有define Py_TRACE_REFS，那么是使用宏。
 void
 _Py_NewReference(PyObject *op)
 {
@@ -2434,6 +2446,8 @@ Py_ReprLeave(PyObject *obj)
 }
 
 /* Trashcan support. */
+
+// tristeen: 限制最大调用深度。
 
 /* Current call-stack depth of tp_dealloc calls. */
 int _PyTrash_delete_nesting = 0;
