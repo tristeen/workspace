@@ -1,0 +1,35 @@
+1. adjust oom_score in linux. oom_score_adj range from -1000 to 1000.
+
+	# cat /proc/981/oom_score
+	18
+	# echo -15 > /proc/981/oom_score_adj
+	# cat /proc/981/oom_score
+	3
+
+2. adjust oom_core in android.
+	Low Memory Killer
+	Android的Low Memory Killer是在标准linux kernel的OOM（Out Of Memory）基础上修改而来的一种内存管理机制，当系统内存不足时，杀死Bad进程释放其内存。Bad进程的选择标准有两个：oom_adj和占用内存的大小。oom_adj代表进程的优先级，数值越大，优先级越高，对应每个oom_adj都有一个空闲内存的阈值。Android Kernel每隔一段时间会检查当前空闲内存是否低于某个阈值，如果是，则杀死oom_adj最大的Bad进程，如果有两个以上Bad进程oom_adj相同，则杀死其中占用内存最多的进程。
+	OOM是标准linux Kernel的一种内存管理机制，Low Memory Killer在它基础上作了改进：
+	(1) OOM基于多个标准给每个进程打分，分最高的进程将被杀死；Low Memory Killer则用oom_adj和占用内存的大小来选择Bad进程.
+	(2) OOM在内存分配不足时调用，而Low Memory Killer每隔一段时间就会检查，一旦发现空闲内存低于某个阈值，则杀死Bad进程。
+	oom_adj/oom_score:
+	这两个是与linux的OOM机制有关的文件，oom_adj相当于一个因子，它值越大，在OOM时更容易被系统kill掉，但最终决定是否被kill的是oom_score，其实计算这个oom_score时，就是根据oom_adj来的，oom_adj更大，计算出来的oom_score就更大，也能容易在OOM时被系统kill掉。当然如果是很重要的服务现场，为了避免出现这种情况设置oom_adj=0就行，表示永远不会因为OOM被kill。
+	Android将进程分为6个等级,它们按优先级顺序由高到低依次是:
+	 
+	  1.前台进程( FOREGROUND_APP)
+	  2.可视进程(VISIBLE_APP )
+	  3. 次要服务进程(SECONDARY_SERVER)
+	  4.后台进程 (HIDDEN_APP)
+	  5.内容供应节点(CONTENT_PROVIDER)
+	  6.空进程(EMPTY_APP)
+	
+	怎样设置使一个应用不被系统杀死：
+	对于放在/system/app下的应用，需要在其Manifest.xml文件中设置persistent属性，如应用程序'Phone'的AndroidManifest.xml文件：
+	 
+	  <application android:name="PhoneApp"
+	                android:persistent="true"
+	                android:label="@string/dialerIconLabel"
+	                android:icon="@drawable/ic_launcher_phone">
+	        ...
+	   </application>
+	设置后app提升为系统核心级别，任何情况下不会被kill掉,settings->applications里面也会屏蔽掉stop操作。
