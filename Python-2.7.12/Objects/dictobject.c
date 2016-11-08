@@ -1707,7 +1707,8 @@ dict_add(PyDictObject* dict1, PyDictObject *dict2)
             return NULL;
     }*/    
 
-    for (Py_ssize_t i = 0; i <= dict2->ma_mask; i++) {
+	Py_ssize_t i = 0;
+    for (i = 0; i <= dict2->ma_mask; i++) {
         PyDictEntry *entry = &dict2->ma_table[i];
         if (entry->me_value != NULL) {
             PyObject *key = entry->me_key;

@@ -35,3 +35,7 @@
 	# sysctl -w vm.panic_on_oom=1
 	vm.panic_on_oom = 1   //1表示关闭，默认为0表示开启OOM
 	# sysctl -p
+
+4.	./configure --with-pydebug
+	up arrow失效的问题，是由于系统缺少readline.so。
+	apt-get install libreadline-dev
