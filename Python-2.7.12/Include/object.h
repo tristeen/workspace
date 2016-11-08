@@ -639,7 +639,8 @@ manually remove this flag though!
 /* Objects support nb_index in PyNumberMethods */
 #define Py_TPFLAGS_HAVE_INDEX (1L<<17)
 
-// tristeen: Py_TPFLAGS_HAVE_VERSION_TAG?
+// tristeen: Py_TPFLAGS_HAVE_VERSION_TAG? 表示是否支持属性cache。
+// Py_TPFLAGS_DEFAULT_CORE包含改flag。
 
 /* Objects support type attribute cache */
 #define Py_TPFLAGS_HAVE_VERSION_TAG   (1L<<18)

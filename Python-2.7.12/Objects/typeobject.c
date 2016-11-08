@@ -31,10 +31,13 @@ struct method_cache_entry {
     PyObject *value;            /* borrowed */
 };
 
+// tristeen: 静态数组。
 static struct method_cache_entry method_cache[1 << MCACHE_SIZE_EXP];
 static unsigned int next_version_tag = 0;
 
-#define MCACHE_STATS 0
+// trieen: 暂打开MCACHE_STATS。
+// #define MCACHE_STATS 0
+#define MCACHE_STATS 1
 
 #if MCACHE_STATS
 static size_t method_cache_hits = 0;
@@ -62,7 +65,9 @@ PyType_ClearCache(void)
 
     for (i = 0; i < (1 << MCACHE_SIZE_EXP); i++) {
         method_cache[i].version = 0;
+        // tristeen: set null before decref。
         Py_CLEAR(method_cache[i].name);
+        // tristeen: 因为value是borrowed.
         method_cache[i].value = NULL;
     }
     next_version_tag = 0;
@@ -71,6 +76,8 @@ PyType_ClearCache(void)
     return cur_version_tag;
 }
 
+// tristeen: 修改type及其子类的，并清除Py_TPFLAGS_VALID_VERSION_TAG。
+// 表示type有修改，cache中的要失效。
 void
 PyType_Modified(PyTypeObject *type)
 {
@@ -104,6 +111,7 @@ PyType_Modified(PyTypeObject *type)
         n = PyList_GET_SIZE(raw);
         for (i = 0; i < n; i++) {
             ref = PyList_GET_ITEM(raw, i);
+            // tristeen: weakref here。
             ref = PyWeakref_GET_OBJECT(ref);
             if (ref != Py_None) {
                 PyType_Modified((PyTypeObject *)ref);
@@ -132,6 +140,7 @@ type_mro_modified(PyTypeObject *type, PyObject *bases) {
     Py_ssize_t i, n;
     int clear = 0;
 
+    // tristeen：Py_BUILD_CORE的情况下，Py_TPFLAGS_DEFAULT包含该标志。
     if (!PyType_HasFeature(type, Py_TPFLAGS_HAVE_VERSION_TAG))
         return;
 
@@ -180,6 +189,7 @@ assign_version_tag(PyTypeObject *type)
     type->tp_version_tag = next_version_tag++;
     /* for stress-testing: next_version_tag &= 0xFF; */
 
+    // tristeen: 初始化。
     if (type->tp_version_tag == 0) {
         /* wrap-around or just starting Python - clear the whole
            cache by filling names with references to Py_None.
@@ -225,6 +235,9 @@ type_name(PyTypeObject *type, void *context)
 {
     const char *s;
 
+    // tristeen: 自定义class就有改标志。
+    // >>> class A(object): pass
+    // >>> (1 << 9) & A.__flags__ 
     if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
         PyHeapTypeObject* et = (PyHeapTypeObject*)type;
 
@@ -232,6 +245,11 @@ type_name(PyTypeObject *type, void *context)
         return et->ht_name;
     }
     else {
+        // tristeen: 例如，A->tp_name为__main__.A。
+        // >>> A
+        // <class __main__.A at 0x00000000022DE828>
+        // >>> A.__name__
+        // 'A'
         s = strrchr(type->tp_name, '.');
         if (s == NULL)
             s = type->tp_name;
@@ -241,6 +259,7 @@ type_name(PyTypeObject *type, void *context)
     }
 }
 
+// tristeen: 只能设置PyHeapTypeObject,不能设置固有类型等。
 static int
 type_set_name(PyTypeObject *type, PyObject *value, void *context)
 {
@@ -274,6 +293,7 @@ type_set_name(PyTypeObject *type, PyObject *value, void *context)
 
     Py_INCREF(value);
 
+    // tristeen: sane means having a sound, healthy mind, right and completed state.
     /* Wait until et is a sane state before Py_DECREF'ing the old et->ht_name
        value.  (Bug #16447.)  */
     tmp = et->ht_name;
@@ -361,6 +381,8 @@ type_set_abstractmethods(PyTypeObject *type, PyObject *value, void *context)
     else {
         abstract = 0;
         res = PyDict_DelItemString(type->tp_dict, "__abstractmethods__");
+        // tristeen: 匹配PyThreadState_GET()->curexc_type。
+        // tstate上记录了上一次错误信息，lasterror之类，不用返回值来返回错误信息。
         if (res && PyErr_ExceptionMatches(PyExc_KeyError)) {
             PyErr_SetString(PyExc_AttributeError, "__abstractmethods__");
             return -1;
@@ -369,12 +391,15 @@ type_set_abstractmethods(PyTypeObject *type, PyObject *value, void *context)
     if (res == 0) {
         PyType_Modified(type);
         if (abstract)
+            // tisteen: Py_TPFLAGS_IS_ABSTRACT表示不能实例化的抽象类型。
             type->tp_flags |= Py_TPFLAGS_IS_ABSTRACT;
         else
             type->tp_flags &= ~Py_TPFLAGS_IS_ABSTRACT;
     }
     return res;
 }
+
+// tristeen: temp here.
 
 static PyObject *
 type_get_bases(PyTypeObject *type, void *context)
