@@ -399,8 +399,6 @@ type_set_abstractmethods(PyTypeObject *type, PyObject *value, void *context)
     return res;
 }
 
-// tristeen: temp here.
-
 static PyObject *
 type_get_bases(PyTypeObject *type, void *context)
 {
@@ -421,6 +419,7 @@ static int update_subclasses(PyTypeObject *type, PyObject *name,
 static int recurse_down_subclasses(PyTypeObject *type, PyObject *name,
                                    update_callback callback, void *data);
 
+// tristeen: 获得type的所有子类，temp为列表，存储返回结果。
 static int
 mro_subclasses(PyTypeObject *type, PyObject* temp)
 {
@@ -434,6 +433,7 @@ mro_subclasses(PyTypeObject *type, PyObject* temp)
     assert(PyList_Check(subclasses));
     n = PyList_GET_SIZE(subclasses);
     for (i = 0; i < n; i++) {
+        // tristeen: subclasses存储内容都是weakref的。
         ref = PyList_GET_ITEM(subclasses, i);
         assert(PyWeakref_CheckRef(ref));
         subclass = (PyTypeObject *)PyWeakref_GET_OBJECT(ref);
