@@ -1,0 +1,128 @@
+mmap example:
+
+	Before mmap: 7f15dd879000-7f15dd87c000
+	
+	00400000-00401000 r-xp 00000000 fe:21 276650391                          /home/sfc/git-workspace/malloc/mmap
+	00600000-00601000 rw-p 00000000 fe:21 276650391                          /home/sfc/git-workspace/malloc/mmap
+	7f15dd2bd000-7f15dd45c000 r-xp 00000000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd45c000-7f15dd65c000 ---p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd65c000-7f15dd660000 r--p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd660000-7f15dd662000 rw-p 001a3000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd662000-7f15dd666000 rw-p 00000000 00:00 0 
+	7f15dd666000-7f15dd686000 r-xp 00000000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd879000-7f15dd87c000 rw-p 00000000 00:00 0 
+	7f15dd882000-7f15dd886000 rw-p 00000000 00:00 0 
+	7f15dd886000-7f15dd887000 r--p 00020000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd887000-7f15dd888000 rw-p 00021000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd888000-7f15dd889000 rw-p 00000000 00:00 0 
+	7ffdd792f000-7ffdd7950000 rw-p 00000000 00:00 0                          [stack]
+	7ffdd79d0000-7ffdd79d2000 r-xp 00000000 00:00 0                          [vdso]
+	7ffdd79d2000-7ffdd79d4000 r--p 00000000 00:00 0                          [vvar]
+	ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+	
+	
+	After mmap: 7f15dd858000-7f15dd87c000
+	
+	00400000-00401000 r-xp 00000000 fe:21 276650391                          /home/sfc/git-workspace/malloc/mmap
+	00600000-00601000 rw-p 00000000 fe:21 276650391                          /home/sfc/git-workspace/malloc/mmap
+	7f15dd2bd000-7f15dd45c000 r-xp 00000000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd45c000-7f15dd65c000 ---p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd65c000-7f15dd660000 r--p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd660000-7f15dd662000 rw-p 001a3000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd662000-7f15dd666000 rw-p 00000000 00:00 0 
+	7f15dd666000-7f15dd686000 r-xp 00000000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd858000-7f15dd87c000 rw-p 00000000 00:00 0 
+	7f15dd882000-7f15dd886000 rw-p 00000000 00:00 0 
+	7f15dd886000-7f15dd887000 r--p 00020000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd887000-7f15dd888000 rw-p 00021000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd888000-7f15dd889000 rw-p 00000000 00:00 0 
+	7ffdd792f000-7ffdd7950000 rw-p 00000000 00:00 0                          [stack]
+	7ffdd79d0000-7ffdd79d2000 r-xp 00000000 00:00 0                          [vdso]
+	7ffdd79d2000-7ffdd79d4000 r--p 00000000 00:00 0                          [vvar]
+	ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+	
+	After munmap: 7f15dd879000-7f15dd87c000
+	
+	00400000-00401000 r-xp 00000000 fe:21 276650391                          /home/sfc/git-workspace/malloc/mmap
+	00600000-00601000 rw-p 00000000 fe:21 276650391                          /home/sfc/git-workspace/malloc/mmap
+	7f15dd2bd000-7f15dd45c000 r-xp 00000000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd45c000-7f15dd65c000 ---p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd65c000-7f15dd660000 r--p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd660000-7f15dd662000 rw-p 001a3000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f15dd662000-7f15dd666000 rw-p 00000000 00:00 0 
+	7f15dd666000-7f15dd686000 r-xp 00000000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd879000-7f15dd87c000 rw-p 00000000 00:00 0 
+	7f15dd882000-7f15dd886000 rw-p 00000000 00:00 0 
+	7f15dd886000-7f15dd887000 r--p 00020000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd887000-7f15dd888000 rw-p 00021000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f15dd888000-7f15dd889000 rw-p 00000000 00:00 0 
+	7ffdd792f000-7ffdd7950000 rw-p 00000000 00:00 0                          [stack]
+	7ffdd79d0000-7ffdd79d2000 r-xp 00000000 00:00 0                          [vdso]
+	7ffdd79d2000-7ffdd79d4000 r--p 00000000 00:00 0                          [vvar]
+	ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+brk example:
+
+
+	init: no heap
+	
+	00400000-00401000 r-xp 00000000 fe:21 276650390                          /home/sfc/git-workspace/malloc/sbrk
+	00600000-00601000 rw-p 00000000 fe:21 276650390                          /home/sfc/git-workspace/malloc/sbrk
+	7f9fee515000-7f9fee6b4000 r-xp 00000000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee6b4000-7f9fee8b4000 ---p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8b4000-7f9fee8b8000 r--p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8b8000-7f9fee8ba000 rw-p 001a3000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8ba000-7f9fee8be000 rw-p 00000000 00:00 0 
+	7f9fee8be000-7f9fee8de000 r-xp 00000000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feead1000-7f9feead4000 rw-p 00000000 00:00 0 
+	7f9feeada000-7f9feeade000 rw-p 00000000 00:00 0 
+	7f9feeade000-7f9feeadf000 r--p 00020000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feeadf000-7f9feeae0000 rw-p 00021000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feeae0000-7f9feeae1000 rw-p 00000000 00:00 0 
+	7ffd99f08000-7ffd99f29000 rw-p 00000000 00:00 0                          [stack]
+	7ffd99f72000-7ffd99f74000 r-xp 00000000 00:00 0                          [vdso]
+	7ffd99f74000-7ffd99f76000 r--p 00000000 00:00 0                          [vvar]
+	ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+	
+	
+	Change break location: heap 00e38000-00e39000
+	
+	00400000-00401000 r-xp 00000000 fe:21 276650390                          /home/sfc/git-workspace/malloc/sbrk
+	00600000-00601000 rw-p 00000000 fe:21 276650390                          /home/sfc/git-workspace/malloc/sbrk
+	00e38000-00e39000 rw-p 00000000 00:00 0                                  [heap]
+	7f9fee515000-7f9fee6b4000 r-xp 00000000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee6b4000-7f9fee8b4000 ---p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8b4000-7f9fee8b8000 r--p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8b8000-7f9fee8ba000 rw-p 001a3000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8ba000-7f9fee8be000 rw-p 00000000 00:00 0 
+	7f9fee8be000-7f9fee8de000 r-xp 00000000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feead1000-7f9feead4000 rw-p 00000000 00:00 0 
+	7f9feeada000-7f9feeade000 rw-p 00000000 00:00 0 
+	7f9feeade000-7f9feeadf000 r--p 00020000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feeadf000-7f9feeae0000 rw-p 00021000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feeae0000-7f9feeae1000 rw-p 00000000 00:00 0 
+	7ffd99f08000-7ffd99f29000 rw-p 00000000 00:00 0                          [stack]
+	7ffd99f72000-7ffd99f74000 r-xp 00000000 00:00 0                          [vdso]
+	7ffd99f74000-7ffd99f76000 r--p 00000000 00:00 0                          [vvar]
+	ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+	
+	
+	Revert change of break location: no heap
+	
+	00400000-00401000 r-xp 00000000 fe:21 276650390                          /home/sfc/git-workspace/malloc/sbrk
+	00600000-00601000 rw-p 00000000 fe:21 276650390                          /home/sfc/git-workspace/malloc/sbrk
+	7f9fee515000-7f9fee6b4000 r-xp 00000000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee6b4000-7f9fee8b4000 ---p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8b4000-7f9fee8b8000 r--p 0019f000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8b8000-7f9fee8ba000 rw-p 001a3000 fd:00 8447742                    /lib/x86_64-linux-gnu/libc-2.19.so
+	7f9fee8ba000-7f9fee8be000 rw-p 00000000 00:00 0 
+	7f9fee8be000-7f9fee8de000 r-xp 00000000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feead1000-7f9feead4000 rw-p 00000000 00:00 0 
+	7f9feeada000-7f9feeade000 rw-p 00000000 00:00 0 
+	7f9feeade000-7f9feeadf000 r--p 00020000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feeadf000-7f9feeae0000 rw-p 00021000 fd:00 8447535                    /lib/x86_64-linux-gnu/ld-2.19.so
+	7f9feeae0000-7f9feeae1000 rw-p 00000000 00:00 0 
+	7ffd99f08000-7ffd99f29000 rw-p 00000000 00:00 0                          [stack]
+	7ffd99f72000-7ffd99f74000 r-xp 00000000 00:00 0                          [vdso]
+	7ffd99f74000-7ffd99f76000 r--p 00000000 00:00 0                          [vvar]
+	ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
