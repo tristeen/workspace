@@ -760,10 +760,27 @@ type_repr(PyTypeObject *type)
 }
 
 // tristeen: 通常情况下，调用tp_new和tp_init。
+// >>> type('A', (object,), {'a':1})
+// type_call begin:
+// <type 'type'>('A', (<type 'object'>,), {'a': 1})<nil>
+// type_call end.
+// type_init begin:
+// <class '__main__.A'>('A', (<type 'object'>,), {'a': 1})<nil>
+// type_init end.
+// object_init begin:
+// <class '__main__.A'>()<nil>
+// object_init end.
+
 static PyObject *
 type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyObject *obj;
+
+    printf("\ntype_call begin:\n");
+    PyObject_Print(type, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\ntype_call end.\n");
 
     if (type->tp_new == NULL) {
         PyErr_Format(PyExc_TypeError,
@@ -773,9 +790,11 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
     }
 
     obj = type->tp_new(type, args, kwds);
+
     if (obj != NULL) {
         /* Ugly exception: when the call was type(something),
            don't call tp_init on the result. */
+        // tristeen: type('ab')这种调用，不用调用tp_init。
         if (type == &PyType_Type &&
             PyTuple_Check(args) && PyTuple_GET_SIZE(args) == 1 &&
             (kwds == NULL ||
@@ -783,9 +802,12 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
             return obj;
         /* If the returned object is not an instance of type,
            it won't be initialized. */
-        if (!PyType_IsSubtype(obj->ob_type, type))
+        // tristeen: 会返回一个不是type的值？
+        if (!PyType_IsSubtype(obj->ob_type, type)) {
             return obj;
+        }
         type = obj->ob_type;
+        // tristeen: type->tp_init()
         if (PyType_HasFeature(type, Py_TPFLAGS_HAVE_CLASS) &&
             type->tp_init != NULL &&
             type->tp_init(obj, args, kwds) < 0) {
@@ -2083,10 +2105,27 @@ _unicode_to_string(PyObject *slots, Py_ssize_t nslots)
 static int
 object_init(PyObject *self, PyObject *args, PyObject *kwds);
 
+// tristeen:
+// >>> type('A', (object,), {'a':1})
+// type_call begin:
+// <type 'type'>('A', (<type 'object'>,), {'a': 1})<nil>
+// type_call end.
+// type_init begin:
+// <class '__main__.A'>('A', (<type 'object'>,), {'a': 1})<nil>
+// type_init end.
+// object_init begin:
+// <class '__main__.A'>()<nil>
+// object_init end.
 static int
 type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 {
     int res;
+
+    printf("type_init begin:\n");
+    PyObject_Print(cls, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\ntype_init end.\n");
 
     assert(args != NULL && PyTuple_Check(args));
     assert(kwds == NULL || PyDict_Check(kwds));
@@ -2183,6 +2222,9 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     for (i = 0; i < nbases; i++) {
         tmp = PyTuple_GET_ITEM(bases, i);
         tmptype = tmp->ob_type;
+        // tristeen: 说明tmptype是个对象
+        // >>>type(a)
+        // >>><class '__main__.a'>
         if (tmptype == &PyClass_Type)
             continue; /* Special case classic classes */
         if (PyType_IsSubtype(winner, tmptype))
@@ -2968,9 +3010,25 @@ excess_args(PyObject *args, PyObject *kwds)
         (kwds && PyDict_Check(kwds) && PyDict_Size(kwds));
 }
 
+// >>> type('A', (object,), {'a':1})
+// type_call begin:
+// <type 'type'>('A', (<type 'object'>,), {'a': 1})<nil>
+// type_call end.
+// type_init begin:
+// <class '__main__.A'>('A', (<type 'object'>,), {'a': 1})<nil>
+// type_init end.
+// object_init begin:
+// <class '__main__.A'>()<nil>
+// object_init end.
 static int
 object_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
+    printf("object_init begin:\n");
+    PyObject_Print(self, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\nobject_init end.\n");
+
     int err = 0;
     if (excess_args(args, kwds)) {
         PyTypeObject *type = Py_TYPE(self);
