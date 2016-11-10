@@ -759,6 +759,7 @@ type_repr(PyTypeObject *type)
     return rtn;
 }
 
+
 static PyObject *
 type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
@@ -1769,6 +1770,7 @@ best_base(PyObject *bases)
             if (PyType_Ready(base_i) < 0)
                 return NULL;
         }
+        // tristeen: 没有Py_TPFLAGS_BASETYPE，类似final。
         if (!PyType_HasFeature(base_i, Py_TPFLAGS_BASETYPE)) {
             PyErr_Format(PyExc_TypeError,
                          "type '%.100s' is not an acceptable base type",
@@ -2108,6 +2110,16 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
     return res;
 }
 
+// tristeen: type_call->type_new, type_init
+// 1. type(x) should return x->ob_type。
+// 2. type(name, bases, dict) return a type obj.
+// 例如: 
+// >>> type(dict)
+// <type 'type'>
+// >>> B = type('B', (object,), {'b1': 1, 'a1': {}}) 
+// >>> B
+// <class '__main__.B'>
+// 参数说明：metatype为元类型，object或者名字通过args[0]传入。
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
@@ -2124,6 +2136,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     assert(kwds == NULL || PyDict_Check(kwds));
 
     /* Special case: type(x) should return x->ob_type */
+    // tristeen: 返回args[0]的ob_type。
     {
         const Py_ssize_t nargs = PyTuple_GET_SIZE(args);
         const Py_ssize_t nkwds = kwds == NULL ? 0 : PyDict_Size(kwds);
@@ -2145,6 +2158,11 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
 
     /* Check arguments: (name, bases, dict) */
+    // tristeen: O!需要两个参数，the first is the address of a Python type object,
+    // the second is the address of the C variable into which the object pointer is
+    // stored.  If the Python object does not have the required type, :exc:`TypeError`
+    // is raised.
+    // kwlist表明key与位置的对应关系。如f('aname', dict={})。
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "SO!O!:type", kwlist,
                                      &name,
                                      &PyTuple_Type, &bases,
@@ -2155,6 +2173,8 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
        and check for metatype conflicts while we're at it.
        Note that if some other metatype wins to contract,
        it's possible that its instances are not types. */
+
+    // tristeen: 找出metatype和bases中不是其他type父type的type。
     nbases = PyTuple_GET_SIZE(bases);
     winner = metatype;
     for (i = 0; i < nbases; i++) {
@@ -2182,6 +2202,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
 
     /* Adjust for empty tuple bases */
+    // tristeen: everything is object now。
     if (nbases == 0) {
         bases = PyTuple_Pack(1, &PyBaseObject_Type);
         if (bases == NULL)
@@ -2230,6 +2251,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         assert(PyTuple_Check(slots));
 
         /* Are slots allowed? */
+        // trsiteen: nslots > 0 && base->tp_itemsize != 0?
         nslots = PyTuple_GET_SIZE(slots);
         if (nslots > 0 && base->tp_itemsize != 0) {
             PyErr_Format(PyExc_TypeError,
@@ -2255,6 +2277,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         for (i = 0; i < nslots; i++) {
             PyObject *tmp = PyTuple_GET_ITEM(slots, i);
             char *s;
+            // tristeen: 检查命名规范。
             if (!valid_identifier(tmp))
                 goto bad_slots;
             assert(PyString_Check(tmp));
@@ -2294,6 +2317,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
             if ((add_dict && strcmp(s, "__dict__") == 0) ||
                 (add_weak && strcmp(s, "__weakref__") == 0))
                 continue;
+            // tristeen: 例如将__a命名成_A__a。只处理__开头的名字。
             tmp =_Py_Mangle(name, tmp);
             if (!tmp) {
                 Py_DECREF(newslots);
