@@ -759,6 +759,7 @@ type_repr(PyTypeObject *type)
     return rtn;
 }
 
+// tristeen: 通常情况下，调用tp_new和tp_init。
 static PyObject *
 type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
@@ -795,6 +796,7 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
     return obj;
 }
 
+// tristeen: 分配内存，设置ob_type、ob_refcnt等。
 PyObject *
 PyType_GenericAlloc(PyTypeObject *type, Py_ssize_t nitems)
 {
@@ -1187,6 +1189,7 @@ static PyTypeObject *solid_base(PyTypeObject *type);
 
 /* type test with subclassing support */
 
+// tristeen: 如果有mro，那么检查mro里边每一项。如果没有，则检查tp_base。
 int
 PyType_IsSubtype(PyTypeObject *a, PyTypeObject *b)
 {
@@ -2108,6 +2111,8 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
     return res;
 }
 
+
+// tristeen: 调用方法。type(dict) 或者 type('A', (dict, ), {'a': 1})。
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
