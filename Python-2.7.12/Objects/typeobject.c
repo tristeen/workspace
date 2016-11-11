@@ -1217,6 +1217,9 @@ PyType_IsSubtype(PyTypeObject *a, PyTypeObject *b)
 {
     PyObject *mro;
 
+	// printf("\nPyType_IsSubtype %s %s.\n", a->tp_name, b->tp_name);
+	// printf("\nPyType_IsSubtype\n");
+
     if (!(a->tp_flags & Py_TPFLAGS_HAVE_CLASS))
         return b == a || b == &PyBaseObject_Type;
 
@@ -2219,6 +2222,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     // tristeen: 找出metatype和bases中不是其他type父type的type。
     nbases = PyTuple_GET_SIZE(bases);
     winner = metatype;
+    printf("\nfind winner, bases:\n");
     for (i = 0; i < nbases; i++) {
         tmp = PyTuple_GET_ITEM(bases, i);
         tmptype = tmp->ob_type;
@@ -2240,6 +2244,12 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
                         "of the metaclasses of all its bases");
         return NULL;
     }
+
+    printf("\nwinner, bases:\n");
+    PyObject_Print(winner, stdout, 0);
+    PyObject_Print(bases, stdout, 0);
+    printf("\nwinner, bases.\n");
+
     if (winner != metatype) {
         if (winner->tp_new != type_new) /* Pass it to the winner */
             return winner->tp_new(winner, args, kwds);
@@ -2422,6 +2432,11 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 
     /* XXX From here until type is safely allocated,
        "return NULL" may leak slots! */
+
+
+	printf("\nslots:\n");
+	PyObject_Print(slots, stdout, 0);
+	printf("\nslots.\n");
 
     /* Allocate the type object */
     type = (PyTypeObject *)metatype->tp_alloc(metatype, nslots);
