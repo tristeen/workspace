@@ -1549,11 +1549,23 @@ consistent method resolution\norder (MRO) for bases");
     Py_DECREF(set);
 }
 
+// tristeen: 
+// class A(object), class B(A), class C(A), class D(B, C)。
+// 对D而言，
+// to_merge: [[B, A, object], [C, A, object], [B, C]],
+// acc: [D]
+// after_merge: [D, B, C, A, object]
 static int
 pmerge(PyObject *acc, PyObject* to_merge) {
     Py_ssize_t i, j, to_merge_size, empty_cnt;
     int *remain;
     int ok;
+
+    printf("\npmerge, to_merge is:\n");
+    PyObject_Print(to_merge, stdout, 0);
+    printf("\nacc:\n");
+    PyObject_Print(acc, stdout, 0);
+    printf("\nto_merge.\n");
 
     to_merge_size = PyList_GET_SIZE(to_merge);
 
@@ -1589,6 +1601,8 @@ pmerge(PyObject *acc, PyObject* to_merge) {
         candidate = PyList_GET_ITEM(cur_list, remain[i]);
         for (j = 0; j < to_merge_size; j++) {
             PyObject *j_lst = PyList_GET_ITEM(to_merge, j);
+            // tristeen: 处理(B, A, object)中的A时，发现后边(C, A, object)
+            // 中还有，则skip。
             if (tail_contains(j_lst, remain[j], candidate)) {
                 goto skip; /* continue outer loop */
             }
@@ -1608,6 +1622,10 @@ pmerge(PyObject *acc, PyObject* to_merge) {
         goto again;
       skip: ;
     }
+
+    printf("\n after pmerge:\n");
+    PyObject_Print(acc, stdout, 0);
+    printf("after merge.\n");
 
     if (empty_cnt == to_merge_size) {
         PyMem_FREE(remain);
@@ -1755,6 +1773,8 @@ mro_internal(PyTypeObject *type)
             }
         }
     }
+
+    // tristeen: 设置mro。
     type->tp_mro = tuple;
 
     type_mro_modified(type, type->tp_mro);
@@ -2662,6 +2682,7 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
     PyObject *mro, *res, *base, *dict;
     unsigned int h;
 
+    // tristeen: method cache。
     if (MCACHE_CACHEABLE_NAME(name) &&
         PyType_HasFeature(type, Py_TPFLAGS_VALID_VERSION_TAG)) {
         /* fast path */
@@ -4259,6 +4280,8 @@ PyType_Ready(PyTypeObject *type)
         type->tp_dict = dict;
     }
 
+    // 将slotdefs，tp_methods，tp_members, tp_getset里边内容
+    // 的指针维护到tp_dict中。
     /* Add type-specific descriptors to tp_dict */
     if (add_operators(type) < 0)
         goto error;
@@ -6628,6 +6651,8 @@ recurse_down_subclasses(PyTypeObject *type, PyObject *name,
    slot that calls the method from the dictionary, and we want to avoid
    infinite recursion here.) */
 
+// tristeen: tp_dict中name是__repr__,__add__等名字，
+// value是method descriptor()。
 static int
 add_operators(PyTypeObject *type)
 {
@@ -6643,6 +6668,7 @@ add_operators(PyTypeObject *type)
         ptr = slotptr(type, p->offset);
         if (!ptr || !*ptr)
             continue;
+        // trsiteen: 先入为主。如果tp_dict里边已有，则直接忽略。
         if (PyDict_GetItem(dict, p->name_strobj))
             continue;
         if (*ptr == PyObject_HashNotImplemented) {
