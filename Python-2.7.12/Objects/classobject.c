@@ -258,6 +258,7 @@ class_getattr(register PyClassObject *op, PyObject *name)
             return v;
         }
     }
+    // tristeen: 查找 op 和 op->cl_bases.
     v = class_lookup(op, name, &klass);
     if (v == NULL) {
         PyErr_Format(PyExc_AttributeError,
