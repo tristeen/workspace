@@ -5,6 +5,19 @@
 
 #include <ctype.h>
 
+void PyType_Print(PyTypeObject *type, FILE *fp)
+{
+    fprintf(fp, "PyTypeObject %s:\n", type->tp_name);
+    fprintf(fp, "ob_refcnt: %d\n", type->ob_refcnt);
+    fprintf(fp, "ob_type: %s\n", type->ob_type->tp_name);
+    fprintf(fp, "---------------------------------\n");
+    PyType_Print(type->ob_type, fp);
+    fprintf(fp, "---------------------------------\n");
+    fprintf(fp, "ob_size: %d\n", type->ob_size);
+    fprintf(fp, "tp_basicsize: %d\n", type->tp_basicsize);
+    fprintf(fp, "tp_itemsize: %d\n", type->tp_itemsize);
+    fprintf(fp, "\n");
+}
 
 /* Support type attribute cache */
 
@@ -2683,7 +2696,7 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
     unsigned int h;
 
     // tristeen: method cache。
-    if (MCACHE_CACHEABLE_NAME(name) &&
+    if (0 && MCACHE_CACHEABLE_NAME(name) &&
         PyType_HasFeature(type, Py_TPFLAGS_VALID_VERSION_TAG)) {
         /* fast path */
         h = MCACHE_HASH_METHOD(type, name);
@@ -2721,6 +2734,14 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
         if (res != NULL)
             break;
     }
+
+    printf("\n");
+    PyObject_Print(type, stdout, 0);
+    printf("\n");
+    PyObject_Print(mro, stdout, 0);
+    printf("\n");
+    PyObject_Print(res, stdout, 0);
+    printf("\n");
 
     if (MCACHE_CACHEABLE_NAME(name) && assign_version_tag(type)) {
         h = MCACHE_HASH_METHOD(type, name);
@@ -2768,9 +2789,14 @@ type_getattro(PyTypeObject *type, PyObject *name)
     /* Look for the attribute in the metatype */
     meta_attribute = _PyType_Lookup(metatype, name);
 
+    printf("1\n");
     if (meta_attribute != NULL) {
         meta_get = Py_TYPE(meta_attribute)->tp_descr_get;
-
+        printf("5\n");
+        if (meta_get != NULL)
+            printf("6\n");
+        if (PyDescr_IsData(meta_attribute))
+            printf("7\n");
         if (meta_get != NULL && PyDescr_IsData(meta_attribute)) {
             /* Data descriptors implement tp_descr_set to intercept
              * writes. Assume the attribute is not overridden in
@@ -2782,6 +2808,7 @@ type_getattro(PyTypeObject *type, PyObject *name)
         Py_INCREF(meta_attribute);
     }
 
+    printf("2\n");
     /* No data descriptor found on metatype. Look in tp_dict of this
      * type and its bases */
     attribute = _PyType_Lookup(type, name);
@@ -2797,11 +2824,12 @@ type_getattro(PyTypeObject *type, PyObject *name)
             return local_get(attribute, (PyObject *)NULL,
                              (PyObject *)type);
         }
-
+        printf("6\n");
         Py_INCREF(attribute);
         return attribute;
     }
 
+    printf("3\n");
     /* No attribute found in local __dict__ (or bases): use the
      * descriptor from the metatype, if any */
     if (meta_get != NULL) {
@@ -2812,6 +2840,7 @@ type_getattro(PyTypeObject *type, PyObject *name)
         return res;
     }
 
+    printf("4\n");
     /* If an ordinary attribute was found on the metatype, return it now */
     if (meta_attribute != NULL) {
         return meta_attribute;

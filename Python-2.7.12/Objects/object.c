@@ -1403,12 +1403,28 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
     descr = _PyType_Lookup(tp, name);
 #endif
 
+    printf("\n descr: %s\n", tp->tp_name);
+    PyObject_Print(descr, stdout, 0);
+    printf("\n");
+
     Py_XINCREF(descr);
 
     f = NULL;
+    // tristeen: Py_TPFLAGS_DEFAULT 包括 Py_TPFLAGS_HAVE_CLASS。
     if (descr != NULL &&
         PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
         // tristeen: f是data attribute的descriptor objects。
+        
+        printf("\n descr->ob_type: \n");
+        PyObject_Print(descr->ob_type, stdout, 0);
+        printf("\n");
+
+        // tristeen: 
+        // descr: 
+        // <slot wrapper '__hash__' of 'object' objects>
+        // descr->ob_type: 
+        // <type 'wrapper_descriptor'>
+
         f = descr->ob_type->tp_descr_get;
         if (f != NULL && PyDescr_IsData(descr)) {
             res = f(descr, obj, (PyObject *)obj->ob_type);
@@ -1452,6 +1468,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
 
     if (f != NULL) {
         res = f(descr, obj, (PyObject *)Py_TYPE(obj));
+        printf("return from _PyObject_GenericGetAttrWithDict\n");
         Py_DECREF(descr);
         goto done;
     }
@@ -1466,6 +1483,10 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
                  "'%.50s' object has no attribute '%.400s'",
                  tp->tp_name, PyString_AS_STRING(name));
   done:
+    // printf("\n res: \n");
+    // PyObject_Print(res, stdout, 0);
+    // printf("\n");
+
     Py_DECREF(name);
     return res;
 }
