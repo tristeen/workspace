@@ -2700,6 +2700,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 PyObject *
 _PyType_Lookup(PyTypeObject *type, PyObject *name)
 {
+    printf("\n_PyType_Lookup\n");
     Py_ssize_t i, n;
     PyObject *mro, *res, *base, *dict;
     unsigned int h;

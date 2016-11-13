@@ -29,11 +29,11 @@
 1.2. 	getattr(a, '__hash__') 和 a.__hash__最终都通过调用
 		PyObject_GetAttr来实现功能。
 
-1.3.	调用 a.ob_type 即 instance 的 tp_getattro 或者 tp_getattr。 instance_getattr?
-		A 为 PyClass_Object. tp_getattro 为 class_getattr。
+1.3.	调用 a.ob_type 即 A 的 tp_getattro 或者 tp_getattr。
+		A 为 PyClass_Type. tp_getattro 为 PyObject_GenericGetAttr (PyBaseObject_Type)。
 
-1.4.	instance_getattr。 先查找 in_dict, 然后调用 class_lookup。 
-		A 以及 A->cl_bases， 返回 object->__hash__。
+1.4.	PyObject_GenericGetAttr 调用 _PyType_Lookup 根据 mro 查找。
+		如果没有找到，再查找 a.__dict__。该例中，最终返回 object->__hash__。
 
 		descr 为 object.__hash__。
 		descr->ob_type 为 wrapper_descriptor。
@@ -94,7 +94,7 @@
 
 3. 其他:
 
-3.1.	A 是 PyClassObject。object 是 PyBaseObject_Type。A 是 object 的子类。
+3.1.	A 是 PyType_Class。object 是 PyBaseObject_Type。A 是 object 的子类。
 
 		>>> type(a)
 		<class '__main__.A'>

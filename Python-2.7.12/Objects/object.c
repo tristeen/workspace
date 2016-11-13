@@ -1183,6 +1183,9 @@ PyObject_GetAttr(PyObject *v, PyObject *name)
 {
     PyTypeObject *tp = Py_TYPE(v);
 
+    printf("\nPyObject_GetAttr: %s\n", tp->tp_name);
+    printf("\n");
+
     if (!PyString_Check(name)) {
 #ifdef Py_USING_UNICODE
         /* The Unicode to string conversion is done here because the
@@ -1338,6 +1341,9 @@ _PyObject_NextNotImplemented(PyObject *self)
 PyObject *
 _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
 {
+    printf("\n_PyObject_GenericGetAttrWithDict\n");
+
+    
     PyTypeObject *tp = Py_TYPE(obj);
     PyObject *descr = NULL;
     PyObject *res = NULL;
