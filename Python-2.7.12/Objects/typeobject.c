@@ -821,13 +821,16 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
         }
         type = obj->ob_type;
         // tristeen: type->tp_init()
+        printf("\nhead of tp_init\n");
         if (PyType_HasFeature(type, Py_TPFLAGS_HAVE_CLASS) &&
             type->tp_init != NULL &&
             type->tp_init(obj, args, kwds) < 0) {
             Py_DECREF(obj);
             obj = NULL;
         }
+        printf("tail of tp_init\n");
     }
+    printf("\ntype_call end.\n");
     return obj;
 }
 
@@ -1636,9 +1639,9 @@ pmerge(PyObject *acc, PyObject* to_merge) {
       skip: ;
     }
 
-    printf("\n after pmerge:\n");
-    PyObject_Print(acc, stdout, 0);
-    printf("after merge.\n");
+    // printf("\n after pmerge:\n");
+    // PyObject_Print(acc, stdout, 0);
+    // printf("after merge.\n");
 
     if (empty_cnt == to_merge_size) {
         PyMem_FREE(remain);
@@ -2203,6 +2206,12 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
+    printf("\ntype_new:\n");
+    PyObject_Print(metatype, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\n");
+
     PyObject *name, *bases, *dict;
     static char *kwlist[] = {"name", "bases", "dict", 0};
     PyObject *slots, *tmp, *newslots;
@@ -2284,10 +2293,10 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
     // 例如: winner: type. bases: (A, object,).
 
-    // printf("\nwinner, bases:\n");
-    // PyObject_Print(winner, stdout, 0);
-    // PyObject_Print(bases, stdout, 0);
-    // printf("\nwinner, bases.\n");
+    printf("\nwinner, bases:\n");
+    PyObject_Print(winner, stdout, 0);
+    PyObject_Print(bases, stdout, 0);
+    printf("\nwinner, bases.\n");
 
     if (winner != metatype) {
         if (winner->tp_new != type_new) /* Pass it to the winner */
@@ -2316,9 +2325,9 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
     // tristeen: bases中所有typeobject，subtype优先。
     // bases: (A, object). base: object.
-    printf("\nbest_base:\n");
-    PyObject_Print(base, stdout, 0);
-    printf("\n");
+    // printf("\nbest_base:\n");
+    // PyObject_Print(base, stdout, 0);
+    // printf("\n");
 
     /* Check for a __slots__ sequence variable in dict, and count it */
     slots = PyDict_GetItemString(dict, "__slots__");
@@ -2735,13 +2744,13 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
             break;
     }
 
-    printf("\n");
-    PyObject_Print(type, stdout, 0);
-    printf("\n");
-    PyObject_Print(mro, stdout, 0);
-    printf("\n");
-    PyObject_Print(res, stdout, 0);
-    printf("\n");
+    // printf("\n");
+    // PyObject_Print(type, stdout, 0);
+    // printf("\n");
+    // PyObject_Print(mro, stdout, 0);
+    // printf("\n");
+    // PyObject_Print(res, stdout, 0);
+    // printf("\n");
 
     if (MCACHE_CACHEABLE_NAME(name) && assign_version_tag(type)) {
         h = MCACHE_HASH_METHOD(type, name);
@@ -3146,6 +3155,12 @@ object_init(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 object_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    printf("\n in object_new \n");
+    PyObject_Print(type, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\n");
+
     int err = 0;
     if (excess_args(args, kwds)) {
         if (type->tp_new != object_new &&
@@ -5050,6 +5065,8 @@ wrap_init(PyObject *self, PyObject *args, void *wrapped, PyObject *kwds)
 static PyObject *
 tp_new_wrapper(PyObject *self, PyObject *args, PyObject *kwds)
 {
+    printf("\n tp_new_wrapper\n");
+
     PyTypeObject *type, *subtype, *staticbase;
     PyObject *arg0, *res;
 
@@ -5979,6 +5996,8 @@ slot_tp_descr_set(PyObject *self, PyObject *target, PyObject *value)
 static int
 slot_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
+    printf("\n slot_tp_init\n");
+
     static PyObject *init_str;
     PyObject *meth = lookup_method(self, "__init__", &init_str);
     PyObject *res;
@@ -6003,6 +6022,7 @@ slot_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 slot_tp_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    printf("\nslot_tp_new\n");
     static PyObject *new_str;
     PyObject *func;
     PyObject *newargs, *x;

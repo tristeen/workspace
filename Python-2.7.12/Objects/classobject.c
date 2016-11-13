@@ -29,6 +29,13 @@ PyObject *
 PyClass_New(PyObject *bases, PyObject *dict, PyObject *name)
      /* bases is NULL or tuple of classobjects! */
 {
+    printf("\n PyClass_New:\n");
+    PyObject_Print(bases, stdout, 0);
+    PyObject_Print(dict, stdout, 0);
+    PyObject_Print(name, stdout, 0);
+    printf("\n");
+
+
     PyClassObject *op, *dummy;
     static PyObject *docstr, *modstr, *namestr;
     if (docstr == NULL) {
@@ -550,6 +557,11 @@ PyInstance_NewRaw(PyObject *klass, PyObject *dict)
 PyObject *
 PyInstance_New(PyObject *klass, PyObject *arg, PyObject *kw)
 {
+    printf("PyInstance_New:\n");
+    PyObject_Print(klass, stdout, 0);
+    PyObject_Print(arg, stdout, 0);
+    PyObject_Print(kw, stdout, 0);
+    printf("\n");
     register PyInstanceObject *inst;
     PyObject *init;
     static PyObject *initstr;

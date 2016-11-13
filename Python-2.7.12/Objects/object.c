@@ -1403,9 +1403,9 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
     descr = _PyType_Lookup(tp, name);
 #endif
 
-    printf("\n descr: %s\n", tp->tp_name);
-    PyObject_Print(descr, stdout, 0);
-    printf("\n");
+    // printf("\n descr: %s\n", tp->tp_name);
+    // PyObject_Print(descr, stdout, 0);
+    // printf("\n");
 
     Py_XINCREF(descr);
 
@@ -1415,9 +1415,9 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
         PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
         // tristeen: f是data attribute的descriptor objects。
         
-        printf("\n descr->ob_type: \n");
-        PyObject_Print(descr->ob_type, stdout, 0);
-        printf("\n");
+        // printf("\n descr->ob_type: \n");
+        // PyObject_Print(descr->ob_type, stdout, 0);
+        // printf("\n");
 
         // tristeen: 
         // descr: 
@@ -1468,7 +1468,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
 
     if (f != NULL) {
         res = f(descr, obj, (PyObject *)Py_TYPE(obj));
-        printf("return from _PyObject_GenericGetAttrWithDict\n");
+        // printf("return from _PyObject_GenericGetAttrWithDict\n");
         Py_DECREF(descr);
         goto done;
     }
