@@ -2203,6 +2203,7 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 // >>> B
 // <class '__main__.B'>
 // 参数说明：metatype为元类型，object或者名字通过args[0]传入。
+// 一般具体的type会覆盖此方法。例如dict的dict_new。
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
@@ -2274,6 +2275,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         // tristeen: 说明tmptype是个对象
         // >>>type(a)
         // >>><class '__main__.a'>
+        // 查找的是tmp的ob_type，如class A的ob_type为type。
         if (tmptype == &PyClass_Type)
             continue; /* Special case classic classes */
         // tristeen: winner: type, tmptype: type。
