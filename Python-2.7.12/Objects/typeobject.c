@@ -48,7 +48,7 @@ struct method_cache_entry {
 static struct method_cache_entry method_cache[1 << MCACHE_SIZE_EXP];
 static unsigned int next_version_tag = 0;
 
-// trieen: 暂打开MCACHE_STATS。
+// tristeen: 暂打开MCACHE_STATS。
 // #define MCACHE_STATS 0
 #define MCACHE_STATS 1
 
