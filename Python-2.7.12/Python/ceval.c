@@ -2155,7 +2155,10 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
 
         TARGET_NOARG(BUILD_CLASS)
         {
+            printf("1. build_class\n");
             u = TOP();
+            PyObject_Print(u, stdout, 0);
+            printf("\n");
             v = SECOND();
             w = THIRD();
             STACKADJ(-2);
@@ -2164,6 +2167,7 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
             Py_DECREF(u);
             Py_DECREF(v);
             Py_DECREF(w);
+            printf("2. build_class\n");
             break;
         }
 
@@ -2990,6 +2994,7 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
 #endif
             stack_pointer = sp;
             PUSH(x);
+            printf("\n end of CALL_FUNCTION\n");
             if (x != NULL) DISPATCH();
             break;
         }
@@ -4321,6 +4326,13 @@ call_function(PyObject ***pp_stack, int oparg
     PyObject *func = *pfunc;
     PyObject *x, *w;
 
+    printf("call_function:\n");
+    PyObject_Print(func, stdout, 0);
+    // printf("\n");
+    // if (PyFunction_Check(func))
+    //  PyObject_Print(((PyFunctionObject*)func)->func_code, stdout, 0);
+    printf("\n");
+
     /* Always dispatch PyCFunction first, because these are
        presumed to be the most frequent callable object.
     */
@@ -4570,6 +4582,7 @@ do_call(PyObject *func, PyObject ***pp_stack, int na, int nk)
  call_fail:
     Py_XDECREF(callargs);
     Py_XDECREF(kwdict);
+    printf("\n end of docall.\n");
     return result;
 }
 
@@ -4938,12 +4951,18 @@ import_all_from(PyObject *locals, PyObject *v)
 static PyObject *
 build_class(PyObject *methods, PyObject *bases, PyObject *name)
 {
+    printf("\n build_class methods:\n");
+    PyObject_Print(methods, stdout, 0);
+    printf("\n");
+
     PyObject *metaclass = NULL, *result, *base;
 
     if (PyDict_Check(methods))
         metaclass = PyDict_GetItemString(methods, "__metaclass__");
+    // tristeen: 定义了 __metaclass__。
     if (metaclass != NULL)
         Py_INCREF(metaclass);
+    // tristeen: 有bases参数，例如class A(object): pass
     else if (PyTuple_Check(bases) && PyTuple_GET_SIZE(bases) > 0) {
         base = PyTuple_GET_ITEM(bases, 0);
         metaclass = PyObject_GetAttrString(base, "__class__");
@@ -4953,6 +4972,7 @@ build_class(PyObject *methods, PyObject *bases, PyObject *name)
             Py_INCREF(metaclass);
         }
     }
+    // tristeen: 无bases参数，例如class B: pass
     else {
         PyObject *g = PyEval_GetGlobals();
         if (g != NULL && PyDict_Check(g))
@@ -4961,6 +4981,20 @@ build_class(PyObject *methods, PyObject *bases, PyObject *name)
             metaclass = (PyObject *) &PyClass_Type;
         Py_INCREF(metaclass);
     }
+
+    // tristeen: 
+    // 对 class A(object): pass 来说：
+    // metaclass is: <type 'type'>
+    // 对 class B: pass 来说：
+    // metaclass is: <type 'classobj'>
+
+    printf("\n metaclass in build_class is:\n");
+    PyObject_Print(metaclass, stdout, 0);
+    PyObject_Print(name, stdout, 0);
+    PyObject_Print(bases, stdout, 0);
+    PyObject_Print(methods, stdout, 0);
+    printf("\n");
+
     result = PyObject_CallFunctionObjArgs(metaclass, name, bases, methods,
                                           NULL);
     Py_DECREF(metaclass);

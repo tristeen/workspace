@@ -29,6 +29,13 @@ PyObject *
 PyClass_New(PyObject *bases, PyObject *dict, PyObject *name)
      /* bases is NULL or tuple of classobjects! */
 {
+    printf("\n PyClass_New:\n");
+    PyObject_Print(bases, stdout, 0);
+    PyObject_Print(dict, stdout, 0);
+    PyObject_Print(name, stdout, 0);
+    printf("\n");
+
+
     PyClassObject *op, *dummy;
     static PyObject *docstr, *modstr, *namestr;
     if (docstr == NULL) {
@@ -203,12 +210,21 @@ class_dealloc(PyClassObject *op)
 static PyObject *
 class_lookup(PyClassObject *cp, PyObject *name, PyClassObject **pclass)
 {
+    printf("\n class_lookup:\n");
+    PyObject_Print(cp, stdout, 0);
+    PyObject_Print(cp->cl_bases, stdout, 0);
+    PyObject_Print(cp->cl_dict, stdout, 0);
+    PyObject_Print(name, stdout, 0);
+    printf("\n");
+
     Py_ssize_t i, n;
     PyObject *value = PyDict_GetItem(cp->cl_dict, name);
     if (value != NULL) {
         *pclass = cp;
         return value;
     }
+    
+
     n = PyTuple_Size(cp->cl_bases);
     for (i = 0; i < n; i++) {
         /* XXX What if one of the bases is not a class? */
@@ -258,6 +274,8 @@ class_getattr(register PyClassObject *op, PyObject *name)
             return v;
         }
     }
+
+    // tristeen: 查找 op 和 op->cl_bases.
     v = class_lookup(op, name, &klass);
     if (v == NULL) {
         PyErr_Format(PyExc_AttributeError,
@@ -549,6 +567,11 @@ PyInstance_NewRaw(PyObject *klass, PyObject *dict)
 PyObject *
 PyInstance_New(PyObject *klass, PyObject *arg, PyObject *kw)
 {
+    printf("PyInstance_New:\n");
+    PyObject_Print(klass, stdout, 0);
+    PyObject_Print(arg, stdout, 0);
+    PyObject_Print(kw, stdout, 0);
+    printf("\n");
     register PyInstanceObject *inst;
     PyObject *init;
     static PyObject *initstr;

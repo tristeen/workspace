@@ -5,6 +5,19 @@
 
 #include <ctype.h>
 
+void PyType_Print(PyTypeObject *type, FILE *fp)
+{
+    fprintf(fp, "PyTypeObject %s:\n", type->tp_name);
+    fprintf(fp, "ob_refcnt: %d\n", type->ob_refcnt);
+    fprintf(fp, "ob_type: %s\n", type->ob_type->tp_name);
+    fprintf(fp, "---------------------------------\n");
+    PyType_Print(type->ob_type, fp);
+    fprintf(fp, "---------------------------------\n");
+    fprintf(fp, "ob_size: %d\n", type->ob_size);
+    fprintf(fp, "tp_basicsize: %d\n", type->tp_basicsize);
+    fprintf(fp, "tp_itemsize: %d\n", type->tp_itemsize);
+    fprintf(fp, "\n");
+}
 
 /* Support type attribute cache */
 
@@ -808,13 +821,16 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
         }
         type = obj->ob_type;
         // tristeen: type->tp_init()
+        printf("\nhead of tp_init\n");
         if (PyType_HasFeature(type, Py_TPFLAGS_HAVE_CLASS) &&
             type->tp_init != NULL &&
             type->tp_init(obj, args, kwds) < 0) {
             Py_DECREF(obj);
             obj = NULL;
         }
+        printf("tail of tp_init\n");
     }
+    printf("\ntype_call end.\n");
     return obj;
 }
 
@@ -822,6 +838,7 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
 PyObject *
 PyType_GenericAlloc(PyTypeObject *type, Py_ssize_t nitems)
 {
+    printf("PyType_GenericAlloc. type is %s. nitems is %d.\n", type->tp_name, nitems);
     PyObject *obj;
     const size_t size = _PyObject_VAR_SIZE(type, nitems+1);
     /* note that we need to add one, for the sentinel */
@@ -1217,6 +1234,9 @@ PyType_IsSubtype(PyTypeObject *a, PyTypeObject *b)
 {
     PyObject *mro;
 
+	// printf("\nPyType_IsSubtype %s %s.\n", a->tp_name, b->tp_name);
+	// printf("\nPyType_IsSubtype\n");
+
     if (!(a->tp_flags & Py_TPFLAGS_HAVE_CLASS))
         return b == a || b == &PyBaseObject_Type;
 
@@ -1545,11 +1565,23 @@ consistent method resolution\norder (MRO) for bases");
     Py_DECREF(set);
 }
 
+// tristeen: 
+// class A(object), class B(A), class C(A), class D(B, C)。
+// 对D而言，
+// to_merge: [[B, A, object], [C, A, object], [B, C]],
+// acc: [D]
+// after_merge: [D, B, C, A, object]
 static int
 pmerge(PyObject *acc, PyObject* to_merge) {
     Py_ssize_t i, j, to_merge_size, empty_cnt;
     int *remain;
     int ok;
+
+    printf("\npmerge, to_merge is:\n");
+    PyObject_Print(to_merge, stdout, 0);
+    printf("\nacc:\n");
+    PyObject_Print(acc, stdout, 0);
+    printf("\nto_merge.\n");
 
     to_merge_size = PyList_GET_SIZE(to_merge);
 
@@ -1585,6 +1617,8 @@ pmerge(PyObject *acc, PyObject* to_merge) {
         candidate = PyList_GET_ITEM(cur_list, remain[i]);
         for (j = 0; j < to_merge_size; j++) {
             PyObject *j_lst = PyList_GET_ITEM(to_merge, j);
+            // tristeen: 处理(B, A, object)中的A时，发现后边(C, A, object)
+            // 中还有，则skip。
             if (tail_contains(j_lst, remain[j], candidate)) {
                 goto skip; /* continue outer loop */
             }
@@ -1604,6 +1638,10 @@ pmerge(PyObject *acc, PyObject* to_merge) {
         goto again;
       skip: ;
     }
+
+    // printf("\n after pmerge:\n");
+    // PyObject_Print(acc, stdout, 0);
+    // printf("after merge.\n");
 
     if (empty_cnt == to_merge_size) {
         PyMem_FREE(remain);
@@ -1751,6 +1789,8 @@ mro_internal(PyTypeObject *type)
             }
         }
     }
+
+    // tristeen: 设置mro。
     type->tp_mro = tuple;
 
     type_mro_modified(type, type->tp_mro);
@@ -2158,7 +2198,8 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 // 例如: 
 // >>> type(dict)
 // <type 'type'>
-// >>> B = type('B', (object,), {'b1': 1, 'a1': {}}) 
+// >>> B = type('B', (A, object,), {'b1': 1, 'a1': {}}) 
+// 以此为例。
 // >>> B
 // <class '__main__.B'>
 // 参数说明：metatype为元类型，object或者名字通过args[0]传入。
@@ -2166,6 +2207,12 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
+    printf("\ntype_new:\n");
+    PyObject_Print(metatype, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\n");
+
     PyObject *name, *bases, *dict;
     static char *kwlist[] = {"name", "bases", "dict", 0};
     PyObject *slots, *tmp, *newslots;
@@ -2206,6 +2253,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     // stored.  If the Python object does not have the required type, :exc:`TypeError`
     // is raised.
     // kwlist表明key与位置的对应关系。如f('aname', dict={})。
+    // 例如: name: B. bases: (A, object, ). dict: {'b1': 1, 'a1': {}}.
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "SO!O!:type", kwlist,
                                      &name,
                                      &PyTuple_Type, &bases,
@@ -2220,6 +2268,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     // tristeen: 找出metatype和bases中不是其他type父type的type。
     nbases = PyTuple_GET_SIZE(bases);
     winner = metatype;
+    // printf("\nfind winner, bases:\n");
     for (i = 0; i < nbases; i++) {
         tmp = PyTuple_GET_ITEM(bases, i);
         tmptype = tmp->ob_type;
@@ -2229,6 +2278,8 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         // 查找的是tmp的ob_type，如class A的ob_type为type。
         if (tmptype == &PyClass_Type)
             continue; /* Special case classic classes */
+        // tristeen: winner: type, tmptype: type。
+        // >>> B = type('B', (object,), {'b1': 1, 'a1': {}}) 
         if (PyType_IsSubtype(winner, tmptype))
             continue;
         if (PyType_IsSubtype(tmptype, winner)) {
@@ -2242,6 +2293,8 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
                         "of the metaclasses of all its bases");
         return NULL;
     }
+    // 例如: winner: type. bases: (A, object,).
+
     printf("\nwinner, bases:\n");
     PyObject_Print(winner, stdout, 0);
     PyObject_Print(bases, stdout, 0);
@@ -2272,6 +2325,11 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         Py_DECREF(bases);
         return NULL;
     }
+    // tristeen: bases中所有typeobject，subtype优先。
+    // bases: (A, object). base: object.
+    // printf("\nbest_base:\n");
+    // PyObject_Print(base, stdout, 0);
+    // printf("\n");
 
     /* Check for a __slots__ sequence variable in dict, and count it */
     slots = PyDict_GetItemString(dict, "__slots__");
@@ -2280,6 +2338,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     add_weak = 0;
     may_add_dict = base->tp_dictoffset == 0;
     may_add_weak = base->tp_weaklistoffset == 0 && base->tp_itemsize == 0;
+    printf("\ntp_dictoffset is %d. tp_weaklistoffset is %d.\n", base->tp_dictoffset, base->tp_weaklistoffset);
     if (slots == NULL) {
         if (may_add_dict) {
             add_dict++;
@@ -2394,6 +2453,8 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         }
 
         /* Secondary bases may provide weakrefs or dict */
+        // tristeen: 如果base没有提供__dict__, __weakref__，
+        // 那么去找bases中其他。
         if (nbases > 1 &&
             ((may_add_dict && !add_dict) ||
              (may_add_weak && !add_weak))) {
@@ -2417,27 +2478,41 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
                 if (may_add_weak && !add_weak &&
                     tmptype->tp_weaklistoffset != 0)
                     add_weak++;
+                // tristeen: 尚未添加完。
                 if (may_add_dict && !add_dict)
                     continue;
                 if (may_add_weak && !add_weak)
                     continue;
+                // tristeen: 已全部添加。
                 /* Nothing more to check */
                 break;
             }
         }
     }
 
+    // tristeen: slots: NULL. add_dict: 1. add_weak: 1.
+
     /* XXX From here until type is safely allocated,
        "return NULL" may leak slots! */
 
+
+	printf("\nslots:\n");
+    printf("add_weak: %d. add_dict: %d.\n", add_weak, add_dict);
+	PyObject_Print(slots, stdout, 0);
+	printf("\nslots.\n");
+
+    // tristeen: metatype: type. nslots: 0.
     /* Allocate the type object */
     type = (PyTypeObject *)metatype->tp_alloc(metatype, nslots);
+    printf("type's type is %s after tp_alloc:\n", type->ob_type->tp_name);
+    
     if (type == NULL) {
         Py_XDECREF(slots);
         Py_DECREF(bases);
         return NULL;
     }
 
+    // tristeen: 将生成的type，放到et中。
     /* Keep name and slots alive in the extended type object */
     et = (PyHeapTypeObject *)type;
     Py_INCREF(name);
@@ -2540,8 +2615,10 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
 
     /* Add descriptors for custom slots from __slots__, or for __dict__ */
+    // tristeen: 指向headtype的slots的第一个entry。
     mp = PyHeapType_GET_MEMBERS(et);
     slotoffset = base->tp_basicsize;
+    // 将slots中内容填充到heaptype的members中。
     if (slots != NULL) {
         for (i = 0; i < nslots; i++, mp++) {
             mp->name = PyString_AS_STRING(
@@ -2557,6 +2634,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
         }
     }
     if (add_dict) {
+        // tristeen: ?
         if (base->tp_itemsize)
             type->tp_dictoffset = -(long)sizeof(PyObject *);
         else
@@ -2570,8 +2648,10 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
     type->tp_basicsize = slotoffset;
     type->tp_itemsize = base->tp_itemsize;
+    // tristeen: type中很多属性直接指向heaptype的某个属性。
     type->tp_members = PyHeapType_GET_MEMBERS(et);
 
+    // tristeen: type的属性以及对应getter/setter。
     if (type->tp_weaklistoffset && type->tp_dictoffset)
         type->tp_getset = subtype_getsets_full;
     else if (type->tp_weaklistoffset && !type->tp_dictoffset)
@@ -2622,11 +2702,13 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 PyObject *
 _PyType_Lookup(PyTypeObject *type, PyObject *name)
 {
+    printf("\n_PyType_Lookup\n");
     Py_ssize_t i, n;
     PyObject *mro, *res, *base, *dict;
     unsigned int h;
 
-    if (MCACHE_CACHEABLE_NAME(name) &&
+    // tristeen: method cache。
+    if (0 && MCACHE_CACHEABLE_NAME(name) &&
         PyType_HasFeature(type, Py_TPFLAGS_VALID_VERSION_TAG)) {
         /* fast path */
         h = MCACHE_HASH_METHOD(type, name);
@@ -2664,6 +2746,14 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
         if (res != NULL)
             break;
     }
+
+    // printf("\n");
+    // PyObject_Print(type, stdout, 0);
+    // printf("\n");
+    // PyObject_Print(mro, stdout, 0);
+    // printf("\n");
+    // PyObject_Print(res, stdout, 0);
+    // printf("\n");
 
     if (MCACHE_CACHEABLE_NAME(name) && assign_version_tag(type)) {
         h = MCACHE_HASH_METHOD(type, name);
@@ -2711,9 +2801,14 @@ type_getattro(PyTypeObject *type, PyObject *name)
     /* Look for the attribute in the metatype */
     meta_attribute = _PyType_Lookup(metatype, name);
 
+    printf("1\n");
     if (meta_attribute != NULL) {
         meta_get = Py_TYPE(meta_attribute)->tp_descr_get;
-
+        printf("5\n");
+        if (meta_get != NULL)
+            printf("6\n");
+        if (PyDescr_IsData(meta_attribute))
+            printf("7\n");
         if (meta_get != NULL && PyDescr_IsData(meta_attribute)) {
             /* Data descriptors implement tp_descr_set to intercept
              * writes. Assume the attribute is not overridden in
@@ -2725,6 +2820,7 @@ type_getattro(PyTypeObject *type, PyObject *name)
         Py_INCREF(meta_attribute);
     }
 
+    printf("2\n");
     /* No data descriptor found on metatype. Look in tp_dict of this
      * type and its bases */
     attribute = _PyType_Lookup(type, name);
@@ -2740,11 +2836,12 @@ type_getattro(PyTypeObject *type, PyObject *name)
             return local_get(attribute, (PyObject *)NULL,
                              (PyObject *)type);
         }
-
+        printf("6\n");
         Py_INCREF(attribute);
         return attribute;
     }
 
+    printf("3\n");
     /* No attribute found in local __dict__ (or bases): use the
      * descriptor from the metatype, if any */
     if (meta_get != NULL) {
@@ -2755,6 +2852,7 @@ type_getattro(PyTypeObject *type, PyObject *name)
         return res;
     }
 
+    printf("4\n");
     /* If an ordinary attribute was found on the metatype, return it now */
     if (meta_attribute != NULL) {
         return meta_attribute;
@@ -3060,6 +3158,12 @@ object_init(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 object_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    printf("\n in object_new \n");
+    PyObject_Print(type, stdout, 0);
+    PyObject_Print(args, stdout, 0);
+    PyObject_Print(kwds, stdout, 0);
+    printf("\n");
+
     int err = 0;
     if (excess_args(args, kwds)) {
         if (type->tp_new != object_new &&
@@ -4223,6 +4327,8 @@ PyType_Ready(PyTypeObject *type)
         type->tp_dict = dict;
     }
 
+    // 将slotdefs，tp_methods，tp_members, tp_getset里边内容
+    // 的指针维护到tp_dict中。
     /* Add type-specific descriptors to tp_dict */
     if (add_operators(type) < 0)
         goto error;
@@ -4323,10 +4429,15 @@ PyType_Ready(PyTypeObject *type)
     n = PyTuple_GET_SIZE(bases);
     for (i = 0; i < n; i++) {
         PyObject *b = PyTuple_GET_ITEM(bases, i);
+        // tristeen: 将type作为b的子类，记录到tp_subclasses。
         if (PyType_Check(b) &&
             add_subclass((PyTypeObject *)b, type) < 0)
             goto error;
     }
+
+    printf("\ntp_dict:\n");
+    PyObject_Print(type->tp_dict, stdout, 0);
+    printf("\ntp_dict:\n");
 
     /* All done -- set the ready flag */
     assert(type->tp_dict != NULL);
@@ -4957,6 +5068,8 @@ wrap_init(PyObject *self, PyObject *args, void *wrapped, PyObject *kwds)
 static PyObject *
 tp_new_wrapper(PyObject *self, PyObject *args, PyObject *kwds)
 {
+    printf("\n tp_new_wrapper\n");
+
     PyTypeObject *type, *subtype, *staticbase;
     PyObject *arg0, *res;
 
@@ -5886,6 +5999,8 @@ slot_tp_descr_set(PyObject *self, PyObject *target, PyObject *value)
 static int
 slot_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
+    printf("\n slot_tp_init\n");
+
     static PyObject *init_str;
     PyObject *meth = lookup_method(self, "__init__", &init_str);
     PyObject *res;
@@ -5910,6 +6025,7 @@ slot_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 slot_tp_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    printf("\nslot_tp_new\n");
     static PyObject *new_str;
     PyObject *func;
     PyObject *newargs, *x;
@@ -6587,6 +6703,8 @@ recurse_down_subclasses(PyTypeObject *type, PyObject *name,
    slot that calls the method from the dictionary, and we want to avoid
    infinite recursion here.) */
 
+// tristeen: tp_dict中name是__repr__,__add__等名字，
+// value是method descriptor()。
 static int
 add_operators(PyTypeObject *type)
 {
@@ -6602,6 +6720,7 @@ add_operators(PyTypeObject *type)
         ptr = slotptr(type, p->offset);
         if (!ptr || !*ptr)
             continue;
+        // trsiteen: 先入为主。如果tp_dict里边已有，则直接忽略。
         if (PyDict_GetItem(dict, p->name_strobj))
             continue;
         if (*ptr == PyObject_HashNotImplemented) {
