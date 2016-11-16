@@ -2721,6 +2721,8 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
         }
     }
 
+    printf("\n_PyType_Lookup\n");
+
     /* Look in tp_dict of types in MRO */
     mro = type->tp_mro;
 
@@ -2746,6 +2748,8 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
         if (res != NULL)
             break;
     }
+    printf("\n_PyType_Lookup\n");
+
 
     // printf("\n");
     // PyObject_Print(type, stdout, 0);
@@ -3129,9 +3133,9 @@ static int
 object_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
     printf("object_init begin:\n");
-    PyObject_Print(self, stdout, 0);
-    PyObject_Print(args, stdout, 0);
-    PyObject_Print(kwds, stdout, 0);
+    // PyObject_Print(self, stdout, 0);
+    // PyObject_Print(args, stdout, 0);
+    // PyObject_Print(kwds, stdout, 0);
     printf("\nobject_init end.\n");
 
     int err = 0;
