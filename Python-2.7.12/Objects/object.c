@@ -2133,6 +2133,9 @@ _Py_ReadyTypes(void)
     if (PyType_Ready(&PyBool_Type) < 0)
         Py_FatalError("Can't initialize bool type");
 
+    if (PyType_Ready(&PyVector_Type) < 0)
+        Py_FatalError("Can't initialize vector type");
+
     if (PyType_Ready(&PyString_Type) < 0)
         Py_FatalError("Can't initialize str type");
 

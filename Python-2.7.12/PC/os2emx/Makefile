@@ -379,6 +379,7 @@ SRC.PYTHON=	$(addprefix $(TOP), \
 SRC.OBJECT=	$(addprefix $(TOP), \
 		Objects/abstract.c \
 		Objects/boolobject.c \
+		Objects/vectorobject.c \
 		Objects/bufferobject.c \
 		Objects/bytearrayobject.c \
 		Objects/bytes_methods.c \

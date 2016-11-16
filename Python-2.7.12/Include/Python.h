@@ -85,6 +85,7 @@
 #include "unicodeobject.h"
 #include "intobject.h"
 #include "boolobject.h"
+#include "vectorobject.h"
 #include "longobject.h"
 #include "floatobject.h"
 #ifndef WITHOUT_COMPLEX
