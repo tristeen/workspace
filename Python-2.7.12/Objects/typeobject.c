@@ -2692,6 +2692,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
 
     /* Put the proper slots in place */
+    // tristeen： 例如处理自定义的__repr__等。
     fixup_slot_dispatchers(type);
 
     return (PyObject *)type;
