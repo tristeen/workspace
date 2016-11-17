@@ -376,6 +376,7 @@ PYTHON_OBJS=	\
 OBJECT_OBJS=	\
 		Objects/abstract.o \
 		Objects/boolobject.o \
+		Objects/vectorobject.o \
 		Objects/bufferobject.o \
 		Objects/bytes_methods.o \
 		Objects/bytearrayobject.o \
@@ -774,6 +775,7 @@ PYTHON_HEADERS= \
 		Include/ast.h \
 		Include/bitset.h \
 		Include/boolobject.h \
+		Include/vectorobject.h \
 		Include/bytearrayobject.h \
 		Include/bytes_methods.h \
 		Include/bytesobject.h \

@@ -146,6 +146,7 @@ PARSER		=                              \
 OBJECTS		=                              \
                   $(PATHOBJ)\Abstract.obj      \
                   $(PATHOBJ)\BoolObject.obj    \
+                  $(PATHOBJ)\VectorObject.obj  \
                   $(PATHOBJ)\BufferObject.obj  \
                   $(PATHOBJ)\CellObject.obj    \
                   $(PATHOBJ)\ClassObject.obj   \
