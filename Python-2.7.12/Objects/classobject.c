@@ -2297,7 +2297,7 @@ PyMethod_New(PyObject *func, PyObject *self, PyObject *klass)
     im->im_class = klass;
     _PyObject_GC_TRACK(im);
 
-	printf("\nPyMethod_New: %s %d\n", ((PyStringObject *)((PyFunctionObject *)im->im_func)->func_name)->ob_sval, (int)im);
+	// printf("\nPyMethod_New: %s %d\n", ((PyStringObject *)((PyFunctionObject *)im->im_func)->func_name)->ob_sval, (int)im);
 	// PyObject_Print((PyObject *)im, stdout, 0);
 	// printf("\n");
     return (PyObject *)im;
@@ -2409,7 +2409,7 @@ instancemethod_new(PyTypeObject* type, PyObject* args, PyObject *kw)
 static void
 instancemethod_dealloc(register PyMethodObject *im)
 {
-	printf("\ninstancemethod_dealloc: %s\n", ((PyStringObject *)((PyFunctionObject *)im->im_func)->func_name)->ob_sval);
+	// printf("\ninstancemethod_dealloc: %s\n", ((PyStringObject *)((PyFunctionObject *)im->im_func)->func_name)->ob_sval);
     _PyObject_GC_UNTRACK(im);
     if (im->im_weakreflist != NULL)
         PyObject_ClearWeakRefs((PyObject *)im);
