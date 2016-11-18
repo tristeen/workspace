@@ -2157,7 +2157,7 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
         {
             // printf("1. build_class\n");
             u = TOP();
-            PyObject_Print(u, stdout, 0);
+            // PyObject_Print(u, stdout, 0);
             // printf("\n");
             v = SECOND();
             w = THIRD();
@@ -4326,12 +4326,12 @@ call_function(PyObject ***pp_stack, int oparg
     PyObject *func = *pfunc;
     PyObject *x, *w;
 
-    printf("call_function:\n");
-    PyObject_Print(func, stdout, 0);
+    // printf("call_function:\n");
+    // PyObject_Print(func, stdout, 0);
     // printf("\n");
     // if (PyFunction_Check(func))
     //  PyObject_Print(((PyFunctionObject*)func)->func_code, stdout, 0);
-    printf("\n");
+    // printf("\n");
 
     /* Always dispatch PyCFunction first, because these are
        presumed to be the most frequent callable object.

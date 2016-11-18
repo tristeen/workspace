@@ -838,7 +838,7 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
 PyObject *
 PyType_GenericAlloc(PyTypeObject *type, Py_ssize_t nitems)
 {
-    printf("PyType_GenericAlloc. type is %s. nitems is %d.\n", type->tp_name, nitems);
+    // printf("PyType_GenericAlloc. type is %s. nitems is %d.\n", type->tp_name, nitems);
     PyObject *obj;
     const size_t size = _PyObject_VAR_SIZE(type, nitems+1);
     /* note that we need to add one, for the sentinel */
@@ -2806,14 +2806,14 @@ type_getattro(PyTypeObject *type, PyObject *name)
     /* Look for the attribute in the metatype */
     meta_attribute = _PyType_Lookup(metatype, name);
 
-    printf("1\n");
+    // printf("1\n");
     if (meta_attribute != NULL) {
         meta_get = Py_TYPE(meta_attribute)->tp_descr_get;
-        printf("5\n");
-        if (meta_get != NULL)
-            printf("6\n");
-        if (PyDescr_IsData(meta_attribute))
-            printf("7\n");
+        // printf("5\n");
+        // if (meta_get != NULL)
+        //     printf("6\n");
+        // if (PyDescr_IsData(meta_attribute))
+        //     printf("7\n");
         if (meta_get != NULL && PyDescr_IsData(meta_attribute)) {
             /* Data descriptors implement tp_descr_set to intercept
              * writes. Assume the attribute is not overridden in
@@ -2825,7 +2825,7 @@ type_getattro(PyTypeObject *type, PyObject *name)
         Py_INCREF(meta_attribute);
     }
 
-    printf("2\n");
+    // printf("2\n");
     /* No data descriptor found on metatype. Look in tp_dict of this
      * type and its bases */
     attribute = _PyType_Lookup(type, name);
@@ -2841,12 +2841,12 @@ type_getattro(PyTypeObject *type, PyObject *name)
             return local_get(attribute, (PyObject *)NULL,
                              (PyObject *)type);
         }
-        printf("6\n");
+        // printf("6\n");
         Py_INCREF(attribute);
         return attribute;
     }
 
-    printf("3\n");
+    // printf("3\n");
     /* No attribute found in local __dict__ (or bases): use the
      * descriptor from the metatype, if any */
     if (meta_get != NULL) {
@@ -2857,7 +2857,7 @@ type_getattro(PyTypeObject *type, PyObject *name)
         return res;
     }
 
-    printf("4\n");
+    // printf("4\n");
     /* If an ordinary attribute was found on the metatype, return it now */
     if (meta_attribute != NULL) {
         return meta_attribute;
@@ -3163,11 +3163,11 @@ object_init(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 object_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    printf("\n in object_new \n");
-    PyObject_Print(type, stdout, 0);
-    PyObject_Print(args, stdout, 0);
-    PyObject_Print(kwds, stdout, 0);
-    printf("\n");
+    // printf("\n in object_new \n");
+    // PyObject_Print(type, stdout, 0);
+    // PyObject_Print(args, stdout, 0);
+    // PyObject_Print(kwds, stdout, 0);
+    // printf("\n");
 
     int err = 0;
     if (excess_args(args, kwds)) {
@@ -6004,7 +6004,7 @@ slot_tp_descr_set(PyObject *self, PyObject *target, PyObject *value)
 static int
 slot_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    printf("\n slot_tp_init\n");
+    // printf("\n slot_tp_init\n");
 
     static PyObject *init_str;
     PyObject *meth = lookup_method(self, "__init__", &init_str);
