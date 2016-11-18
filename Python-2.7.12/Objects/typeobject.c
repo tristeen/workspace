@@ -789,11 +789,11 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyObject *obj;
 
-    printf("\ntype_call begin:\n");
-    PyObject_Print(type, stdout, 0);
-    PyObject_Print(args, stdout, 0);
-    PyObject_Print(kwds, stdout, 0);
-    printf("\ntype_call end.\n");
+    // printf("\ntype_call begin:\n");
+    // PyObject_Print(type, stdout, 0);
+    // PyObject_Print(args, stdout, 0);
+    // PyObject_Print(kwds, stdout, 0);
+    // printf("\ntype_call end.\n");
 
     if (type->tp_new == NULL) {
         PyErr_Format(PyExc_TypeError,
@@ -821,16 +821,16 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
         }
         type = obj->ob_type;
         // tristeen: type->tp_init()
-        printf("\nhead of tp_init\n");
+        // printf("\nhead of tp_init\n");
         if (PyType_HasFeature(type, Py_TPFLAGS_HAVE_CLASS) &&
             type->tp_init != NULL &&
             type->tp_init(obj, args, kwds) < 0) {
             Py_DECREF(obj);
             obj = NULL;
         }
-        printf("tail of tp_init\n");
+        // printf("tail of tp_init\n");
     }
-    printf("\ntype_call end.\n");
+    // printf("\ntype_call end.\n");
     return obj;
 }
 
@@ -1577,11 +1577,11 @@ pmerge(PyObject *acc, PyObject* to_merge) {
     int *remain;
     int ok;
 
-    printf("\npmerge, to_merge is:\n");
-    PyObject_Print(to_merge, stdout, 0);
-    printf("\nacc:\n");
-    PyObject_Print(acc, stdout, 0);
-    printf("\nto_merge.\n");
+    // printf("\npmerge, to_merge is:\n");
+    // PyObject_Print(to_merge, stdout, 0);
+    // printf("\nacc:\n");
+    // PyObject_Print(acc, stdout, 0);
+    // printf("\nto_merge.\n");
 
     to_merge_size = PyList_GET_SIZE(to_merge);
 
@@ -2161,11 +2161,11 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 {
     int res;
 
-    printf("type_init begin:\n");
-    PyObject_Print(cls, stdout, 0);
-    PyObject_Print(args, stdout, 0);
-    PyObject_Print(kwds, stdout, 0);
-    printf("\ntype_init end.\n");
+    // printf("type_init begin:\n");
+    // PyObject_Print(cls, stdout, 0);
+    // PyObject_Print(args, stdout, 0);
+    // PyObject_Print(kwds, stdout, 0);
+    // printf("\ntype_init end.\n");
 
     assert(args != NULL && PyTuple_Check(args));
     assert(kwds == NULL || PyDict_Check(kwds));
@@ -2207,11 +2207,11 @@ type_init(PyObject *cls, PyObject *args, PyObject *kwds)
 static PyObject *
 type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
-    printf("\ntype_new:\n");
-    PyObject_Print(metatype, stdout, 0);
-    PyObject_Print(args, stdout, 0);
-    PyObject_Print(kwds, stdout, 0);
-    printf("\n");
+    // printf("\ntype_new:\n");
+    // PyObject_Print(metatype, stdout, 0);
+    // PyObject_Print(args, stdout, 0);
+    // PyObject_Print(kwds, stdout, 0);
+    // printf("\n");
 
     PyObject *name, *bases, *dict;
     static char *kwlist[] = {"name", "bases", "dict", 0};
@@ -2295,10 +2295,10 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     }
     // 例如: winner: type. bases: (A, object,).
 
-    printf("\nwinner, bases:\n");
-    PyObject_Print(winner, stdout, 0);
-    PyObject_Print(bases, stdout, 0);
-    printf("\nwinner, bases.\n");
+    // printf("\nwinner, bases:\n");
+    // PyObject_Print(winner, stdout, 0);
+    // PyObject_Print(bases, stdout, 0);
+    // printf("\nwinner, bases.\n");
 
     if (winner != metatype) {
         if (winner->tp_new != type_new) /* Pass it to the winner */
@@ -2338,7 +2338,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
     add_weak = 0;
     may_add_dict = base->tp_dictoffset == 0;
     may_add_weak = base->tp_weaklistoffset == 0 && base->tp_itemsize == 0;
-    printf("\ntp_dictoffset is %d. tp_weaklistoffset is %d.\n", base->tp_dictoffset, base->tp_weaklistoffset);
+    // printf("\ntp_dictoffset is %d. tp_weaklistoffset is %d.\n", base->tp_dictoffset, base->tp_weaklistoffset);
     if (slots == NULL) {
         if (may_add_dict) {
             add_dict++;
@@ -2496,15 +2496,15 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
        "return NULL" may leak slots! */
 
 
-	printf("\nslots:\n");
-    printf("add_weak: %d. add_dict: %d.\n", add_weak, add_dict);
-	PyObject_Print(slots, stdout, 0);
-	printf("\nslots.\n");
+	// printf("\nslots:\n");
+    // printf("add_weak: %d. add_dict: %d.\n", add_weak, add_dict);
+	// PyObject_Print(slots, stdout, 0);
+	// printf("\nslots.\n");
 
     // tristeen: metatype: type. nslots: 0.
     /* Allocate the type object */
     type = (PyTypeObject *)metatype->tp_alloc(metatype, nslots);
-    printf("type's type is %s after tp_alloc:\n", type->ob_type->tp_name);
+    // printf("type's type is %s after tp_alloc:\n", type->ob_type->tp_name);
     
     if (type == NULL) {
         Py_XDECREF(slots);
@@ -2703,7 +2703,7 @@ type_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 PyObject *
 _PyType_Lookup(PyTypeObject *type, PyObject *name)
 {
-    printf("\n_PyType_Lookup\n");
+    // printf("\n_PyType_Lookup\n");
     Py_ssize_t i, n;
     PyObject *mro, *res, *base, *dict;
     unsigned int h;
@@ -2722,7 +2722,7 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
         }
     }
 
-    printf("\n_PyType_Lookup\n");
+    // printf("\n_PyType_Lookup\n");
 
     /* Look in tp_dict of types in MRO */
     mro = type->tp_mro;
@@ -2749,7 +2749,7 @@ _PyType_Lookup(PyTypeObject *type, PyObject *name)
         if (res != NULL)
             break;
     }
-    printf("\n_PyType_Lookup\n");
+    // printf("\n_PyType_Lookup\n");
 
 
     // printf("\n");
@@ -3133,11 +3133,11 @@ excess_args(PyObject *args, PyObject *kwds)
 static int
 object_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    printf("object_init begin:\n");
+    // printf("object_init begin:\n");
     // PyObject_Print(self, stdout, 0);
     // PyObject_Print(args, stdout, 0);
     // PyObject_Print(kwds, stdout, 0);
-    printf("\nobject_init end.\n");
+    // printf("\nobject_init end.\n");
 
     int err = 0;
     if (excess_args(args, kwds)) {
@@ -4440,9 +4440,9 @@ PyType_Ready(PyTypeObject *type)
             goto error;
     }
 
-    printf("\ntp_dict:\n");
-    PyObject_Print(type->tp_dict, stdout, 0);
-    printf("\ntp_dict:\n");
+    // printf("\ntp_dict:\n");
+    // PyObject_Print(type->tp_dict, stdout, 0);
+    // printf("\ntp_dict:\n");
 
     /* All done -- set the ready flag */
     assert(type->tp_dict != NULL);
@@ -5073,7 +5073,7 @@ wrap_init(PyObject *self, PyObject *args, void *wrapped, PyObject *kwds)
 static PyObject *
 tp_new_wrapper(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    printf("\n tp_new_wrapper\n");
+    // printf("\n tp_new_wrapper\n");
 
     PyTypeObject *type, *subtype, *staticbase;
     PyObject *arg0, *res;
@@ -6030,7 +6030,7 @@ slot_tp_init(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 slot_tp_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    printf("\nslot_tp_new\n");
+    // printf("\nslot_tp_new\n");
     static PyObject *new_str;
     PyObject *func;
     PyObject *newargs, *x;

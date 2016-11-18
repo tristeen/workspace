@@ -2155,10 +2155,10 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
 
         TARGET_NOARG(BUILD_CLASS)
         {
-            printf("1. build_class\n");
+            // printf("1. build_class\n");
             u = TOP();
             PyObject_Print(u, stdout, 0);
-            printf("\n");
+            // printf("\n");
             v = SECOND();
             w = THIRD();
             STACKADJ(-2);
@@ -2167,7 +2167,7 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
             Py_DECREF(u);
             Py_DECREF(v);
             Py_DECREF(w);
-            printf("2. build_class\n");
+            // printf("2. build_class\n");
             break;
         }
 
@@ -2994,7 +2994,7 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
 #endif
             stack_pointer = sp;
             PUSH(x);
-            printf("\n end of CALL_FUNCTION\n");
+            // printf("\n end of CALL_FUNCTION\n");
             if (x != NULL) DISPATCH();
             break;
         }
@@ -4582,7 +4582,7 @@ do_call(PyObject *func, PyObject ***pp_stack, int na, int nk)
  call_fail:
     Py_XDECREF(callargs);
     Py_XDECREF(kwdict);
-    printf("\n end of docall.\n");
+    // printf("\n end of docall.\n");
     return result;
 }
 
@@ -4951,9 +4951,9 @@ import_all_from(PyObject *locals, PyObject *v)
 static PyObject *
 build_class(PyObject *methods, PyObject *bases, PyObject *name)
 {
-    printf("\n build_class methods:\n");
-    PyObject_Print(methods, stdout, 0);
-    printf("\n");
+    // printf("\n build_class methods:\n");
+    // PyObject_Print(methods, stdout, 0);
+    // printf("\n");
 
     PyObject *metaclass = NULL, *result, *base;
 
@@ -4988,12 +4988,12 @@ build_class(PyObject *methods, PyObject *bases, PyObject *name)
     // 对 class B: pass 来说：
     // metaclass is: <type 'classobj'>
 
-    printf("\n metaclass in build_class is:\n");
-    PyObject_Print(metaclass, stdout, 0);
-    PyObject_Print(name, stdout, 0);
-    PyObject_Print(bases, stdout, 0);
-    PyObject_Print(methods, stdout, 0);
-    printf("\n");
+    // printf("\n metaclass in build_class is:\n");
+    // PyObject_Print(metaclass, stdout, 0);
+    // PyObject_Print(name, stdout, 0);
+    // PyObject_Print(bases, stdout, 0);
+    // PyObject_Print(methods, stdout, 0);
+    // printf("\n");
 
     result = PyObject_CallFunctionObjArgs(metaclass, name, bases, methods,
                                           NULL);

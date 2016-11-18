@@ -80,6 +80,7 @@ PyAPI_FUNC(PyObject *) PyDescr_NewGetSet(PyTypeObject *,
                                                struct PyGetSetDef *);
 PyAPI_FUNC(PyObject *) PyDescr_NewWrapper(PyTypeObject *,
                                                 struct wrapperbase *, void *);
+// tristeen: 有get和set
 #define PyDescr_IsData(d) (Py_TYPE(d)->tp_descr_set != NULL)
 
 PyAPI_FUNC(PyObject *) PyDictProxy_New(PyObject *);

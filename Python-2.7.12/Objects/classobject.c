@@ -29,11 +29,11 @@ PyObject *
 PyClass_New(PyObject *bases, PyObject *dict, PyObject *name)
      /* bases is NULL or tuple of classobjects! */
 {
-    printf("\n PyClass_New:\n");
-    PyObject_Print(bases, stdout, 0);
-    PyObject_Print(dict, stdout, 0);
-    PyObject_Print(name, stdout, 0);
-    printf("\n");
+    // printf("\n PyClass_New:\n");
+    // PyObject_Print(bases, stdout, 0);
+    // PyObject_Print(dict, stdout, 0);
+    // PyObject_Print(name, stdout, 0);
+    // printf("\n");
 
 
     PyClassObject *op, *dummy;
@@ -210,12 +210,12 @@ class_dealloc(PyClassObject *op)
 static PyObject *
 class_lookup(PyClassObject *cp, PyObject *name, PyClassObject **pclass)
 {
-    printf("\n class_lookup:\n");
-    PyObject_Print(cp, stdout, 0);
-    PyObject_Print(cp->cl_bases, stdout, 0);
-    PyObject_Print(cp->cl_dict, stdout, 0);
-    PyObject_Print(name, stdout, 0);
-    printf("\n");
+    // printf("\n class_lookup:\n");
+    // PyObject_Print(cp, stdout, 0);
+    // PyObject_Print(cp->cl_bases, stdout, 0);
+    // PyObject_Print(cp->cl_dict, stdout, 0);
+    // PyObject_Print(name, stdout, 0);
+    // printf("\n");
 
     Py_ssize_t i, n;
     PyObject *value = PyDict_GetItem(cp->cl_dict, name);
@@ -567,11 +567,11 @@ PyInstance_NewRaw(PyObject *klass, PyObject *dict)
 PyObject *
 PyInstance_New(PyObject *klass, PyObject *arg, PyObject *kw)
 {
-    printf("PyInstance_New:\n");
-    PyObject_Print(klass, stdout, 0);
-    PyObject_Print(arg, stdout, 0);
-    PyObject_Print(kw, stdout, 0);
-    printf("\n");
+    // printf("PyInstance_New:\n");
+    // PyObject_Print(klass, stdout, 0);
+    // PyObject_Print(arg, stdout, 0);
+    // PyObject_Print(kw, stdout, 0);
+    // printf("\n");
     register PyInstanceObject *inst;
     PyObject *init;
     static PyObject *initstr;

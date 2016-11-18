@@ -1183,8 +1183,8 @@ PyObject_GetAttr(PyObject *v, PyObject *name)
 {
     PyTypeObject *tp = Py_TYPE(v);
 
-    printf("\nPyObject_GetAttr: %s\n", tp->tp_name);
-    printf("\n");
+    // printf("\nPyObject_GetAttr: %s\n", tp->tp_name);
+    // printf("\n");
 
     if (!PyString_Check(name)) {
 #ifdef Py_USING_UNICODE
@@ -1341,7 +1341,7 @@ _PyObject_NextNotImplemented(PyObject *self)
 PyObject *
 _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
 {
-    printf("\n_PyObject_GenericGetAttrWithDict\n");
+    // printf("\n_PyObject_GenericGetAttrWithDict\n");
 
     
     PyTypeObject *tp = Py_TYPE(obj);
@@ -1431,6 +1431,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
         // descr->ob_type: 
         // <type 'wrapper_descriptor'>
 
+        // tristeen: 如果定义了__get__和__set__。 
         f = descr->ob_type->tp_descr_get;
         if (f != NULL && PyDescr_IsData(descr)) {
             res = f(descr, obj, (PyObject *)obj->ob_type);
@@ -1439,6 +1440,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name, PyObject *dict)
         }
     }
 
+    // tristeen: 查找__dict__。
     if (dict == NULL) {
         /* Inline _PyObject_GetDictPtr */
         dictoffset = tp->tp_dictoffset;
@@ -1545,6 +1547,7 @@ _PyObject_GenericSetAttrWithDict(PyObject *obj, PyObject *name,
     if (descr != NULL &&
         PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
         f = descr->ob_type->tp_descr_set;
+        // tristeen: 有get和set
         if (f != NULL && PyDescr_IsData(descr)) {
             res = f(descr, obj, value);
             goto done;

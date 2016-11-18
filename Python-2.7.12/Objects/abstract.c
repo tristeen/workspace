@@ -2544,7 +2544,7 @@ PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw)
         if (Py_EnterRecursiveCall(" while calling a Python object"))
             return NULL;
 
-        printf("\n PyObject_Call: %s\n", func->ob_type->tp_name);
+        // printf("\n PyObject_Call: %s\n", func->ob_type->tp_name);
         
         result = (*call)(func, arg, kw);
         Py_LeaveRecursiveCall();
