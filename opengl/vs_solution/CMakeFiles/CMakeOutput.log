@@ -1,0 +1,247 @@
+The system is: Windows - 6.1 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler:  
+Build flags: 
+Id flags: 
+
+The output was:
+0
+Microsoft (R) 生成引擎版本 14.0.25420.1
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+生成启动时间为 2016/12/28 9:46:28。
+节点 1 上的项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\3.1.3\CompilerIdC\CompilerIdC.vcxproj”(默认目标)。
+PrepareForBuild:
+  正在创建目录“Debug\”。
+  正在创建目录“Debug\CompilerIdC.tlog\”。
+InitializeBuildStatus:
+  正在创建“Debug\CompilerIdC.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /nologo /W0 /WX- /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue CMakeCCompilerId.c
+  CMakeCCompilerId.c
+Link:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdC.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCCompilerId.obj
+  CompilerIdC.vcxproj -> E:\workspace\git-workspace\opengl\build\CMakeFiles\3.1.3\CompilerIdC\.\CompilerIdC.exe
+PostBuildEvent:
+  for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+  :VCEnd
+  CMAKE_C_COMPILER=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\cl.exe
+FinalizeBuildStatus:
+  正在删除文件“Debug\CompilerIdC.tlog\unsuccessfulbuild”。
+  正在对“Debug\CompilerIdC.tlog\CompilerIdC.lastbuildstate”执行 Touch 任务。
+已完成生成项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\3.1.3\CompilerIdC\CompilerIdC.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.89
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+
+The C compiler identification is MSVC, found in "E:/workspace/git-workspace/opengl/build/CMakeFiles/3.1.3/CompilerIdC/CompilerIdC.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler:  
+Build flags: 
+Id flags: 
+
+The output was:
+0
+Microsoft (R) 生成引擎版本 14.0.25420.1
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+生成启动时间为 2016/12/28 9:46:31。
+节点 1 上的项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\3.1.3\CompilerIdCXX\CompilerIdCXX.vcxproj”(默认目标)。
+PrepareForBuild:
+  正在创建目录“Debug\”。
+  正在创建目录“Debug\CompilerIdCXX.tlog\”。
+InitializeBuildStatus:
+  正在创建“Debug\CompilerIdCXX.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /nologo /W0 /WX- /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue CMakeCXXCompilerId.cpp
+  CMakeCXXCompilerId.cpp
+Link:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdCXX.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCXXCompilerId.obj
+  CompilerIdCXX.vcxproj -> E:\workspace\git-workspace\opengl\build\CMakeFiles\3.1.3\CompilerIdCXX\.\CompilerIdCXX.exe
+PostBuildEvent:
+  for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+  :VCEnd
+  CMAKE_CXX_COMPILER=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\cl.exe
+FinalizeBuildStatus:
+  正在删除文件“Debug\CompilerIdCXX.tlog\unsuccessfulbuild”。
+  正在对“Debug\CompilerIdCXX.tlog\CompilerIdCXX.lastbuildstate”执行 Touch 任务。
+已完成生成项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\3.1.3\CompilerIdCXX\CompilerIdCXX.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.87
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+
+The CXX compiler identification is MSVC, found in "E:/workspace/git-workspace/opengl/build/CMakeFiles/3.1.3/CompilerIdCXX/CompilerIdCXX.exe"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTryCompileExec1502385205.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Microsoft (R) 生成引擎版本 14.0.25420.1
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+生成启动时间为 2016/12/28 9:46:33。
+节点 1 上的项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec1502385205.vcxproj”(默认目标)。
+PrepareForBuild:
+  正在创建目录“cmTryCompileExec1502385205.dir\Debug\”。
+  正在创建目录“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\”。
+  正在创建目录“cmTryCompileExec1502385205.dir\Debug\cmTryCom.3B3D3B6E.tlog\”。
+InitializeBuildStatus:
+  正在创建“cmTryCompileExec1502385205.dir\Debug\cmTryCom.3B3D3B6E.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTryCompileExec1502385205.dir\Debug\\" /Fd"cmTryCompileExec1502385205.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\testCCompiler.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTryCompileExec1502385205.dir\Debug\\" /Fd"cmTryCompileExec1502385205.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\testCCompiler.c"
+  
+  testCCompiler.c
+Link:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec1502385205.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec1502385205.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec1502385205.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec1502385205.dir\Debug\testCCompiler.obj
+  cmTryCompileExec1502385205.vcxproj -> E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec1502385205.exe
+  cmTryCompileExec1502385205.vcxproj -> E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec1502385205.pdb (Full PDB)
+FinalizeBuildStatus:
+  正在删除文件“cmTryCompileExec1502385205.dir\Debug\cmTryCom.3B3D3B6E.tlog\unsuccessfulbuild”。
+  正在对“cmTryCompileExec1502385205.dir\Debug\cmTryCom.3B3D3B6E.tlog\cmTryCompileExec1502385205.lastbuildstate”执行 Touch 任务。
+已完成生成项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec1502385205.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.82
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTryCompileExec3723982646.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Microsoft (R) 生成引擎版本 14.0.25420.1
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+生成启动时间为 2016/12/28 9:46:35。
+节点 1 上的项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec3723982646.vcxproj”(默认目标)。
+PrepareForBuild:
+  正在创建目录“cmTryCompileExec3723982646.dir\Debug\”。
+  正在创建目录“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\”。
+  正在创建目录“cmTryCompileExec3723982646.dir\Debug\cmTryCom.75E39F75.tlog\”。
+InitializeBuildStatus:
+  正在创建“cmTryCompileExec3723982646.dir\Debug\cmTryCom.75E39F75.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTryCompileExec3723982646.dir\Debug\\" /Fd"cmTryCompileExec3723982646.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "E:\g4\pack\CMake\share\cmake-3.1\Modules\CMakeCCompilerABI.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTryCompileExec3723982646.dir\Debug\\" /Fd"cmTryCompileExec3723982646.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "E:\g4\pack\CMake\share\cmake-3.1\Modules\CMakeCCompilerABI.c"
+  
+  CMakeCCompilerABI.c
+Link:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec3723982646.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3723982646.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3723982646.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec3723982646.dir\Debug\CMakeCCompilerABI.obj
+  cmTryCompileExec3723982646.vcxproj -> E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec3723982646.exe
+  cmTryCompileExec3723982646.vcxproj -> E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3723982646.pdb (Full PDB)
+FinalizeBuildStatus:
+  正在删除文件“cmTryCompileExec3723982646.dir\Debug\cmTryCom.75E39F75.tlog\unsuccessfulbuild”。
+  正在对“cmTryCompileExec3723982646.dir\Debug\cmTryCom.75E39F75.tlog\cmTryCompileExec3723982646.lastbuildstate”执行 Touch 任务。
+已完成生成项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec3723982646.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.75
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTryCompileExec2179122815.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Microsoft (R) 生成引擎版本 14.0.25420.1
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+生成启动时间为 2016/12/28 9:46:37。
+节点 1 上的项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec2179122815.vcxproj”(默认目标)。
+PrepareForBuild:
+  正在创建目录“cmTryCompileExec2179122815.dir\Debug\”。
+  正在创建目录“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\”。
+  正在创建目录“cmTryCompileExec2179122815.dir\Debug\cmTryCom.9A95B95E.tlog\”。
+InitializeBuildStatus:
+  正在创建“cmTryCompileExec2179122815.dir\Debug\cmTryCom.9A95B95E.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTryCompileExec2179122815.dir\Debug\\" /Fd"cmTryCompileExec2179122815.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTryCompileExec2179122815.dir\Debug\\" /Fd"cmTryCompileExec2179122815.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
+  
+  testCXXCompiler.cxx
+Link:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2179122815.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2179122815.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2179122815.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec2179122815.dir\Debug\testCXXCompiler.obj
+  cmTryCompileExec2179122815.vcxproj -> E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2179122815.exe
+  cmTryCompileExec2179122815.vcxproj -> E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2179122815.pdb (Full PDB)
+FinalizeBuildStatus:
+  正在删除文件“cmTryCompileExec2179122815.dir\Debug\cmTryCom.9A95B95E.tlog\unsuccessfulbuild”。
+  正在对“cmTryCompileExec2179122815.dir\Debug\cmTryCom.9A95B95E.tlog\cmTryCompileExec2179122815.lastbuildstate”执行 Touch 任务。
+已完成生成项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec2179122815.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.77
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTryCompileExec2286082566.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Microsoft (R) 生成引擎版本 14.0.25420.1
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+生成启动时间为 2016/12/28 9:46:40。
+节点 1 上的项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec2286082566.vcxproj”(默认目标)。
+PrepareForBuild:
+  正在创建目录“cmTryCompileExec2286082566.dir\Debug\”。
+  正在创建目录“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\”。
+  正在创建目录“cmTryCompileExec2286082566.dir\Debug\cmTryCom.5E6542CC.tlog\”。
+InitializeBuildStatus:
+  正在创建“cmTryCompileExec2286082566.dir\Debug\cmTryCom.5E6542CC.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTryCompileExec2286082566.dir\Debug\\" /Fd"cmTryCompileExec2286082566.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "E:\g4\pack\CMake\share\cmake-3.1\Modules\CMakeCXXCompilerABI.cpp"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTryCompileExec2286082566.dir\Debug\\" /Fd"cmTryCompileExec2286082566.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "E:\g4\pack\CMake\share\cmake-3.1\Modules\CMakeCXXCompilerABI.cpp"
+  
+  CMakeCXXCompilerABI.cpp
+Link:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2286082566.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2286082566.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2286082566.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec2286082566.dir\Debug\CMakeCXXCompilerABI.obj
+  cmTryCompileExec2286082566.vcxproj -> E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2286082566.exe
+  cmTryCompileExec2286082566.vcxproj -> E:/workspace/git-workspace/opengl/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2286082566.pdb (Full PDB)
+FinalizeBuildStatus:
+  正在删除文件“cmTryCompileExec2286082566.dir\Debug\cmTryCom.5E6542CC.tlog\unsuccessfulbuild”。
+  正在对“cmTryCompileExec2286082566.dir\Debug\cmTryCom.5E6542CC.tlog\cmTryCompileExec2286082566.lastbuildstate”执行 Touch 任务。
+已完成生成项目“E:\workspace\git-workspace\opengl\build\CMakeFiles\CMakeTmp\cmTryCompileExec2286082566.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.77
+
+
